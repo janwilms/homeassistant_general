@@ -1,0 +1,124 @@
+platform: template
+sensors:
+  napelsstraat_chargers:
+    friendly_name: "Napelsstraat Available Chargers"
+    unique_id: napelsstraat_available_chargers
+    value_template: >
+      {% set sensors = [
+        'sensor.blink_charging_23_napelsstraat_antwerpen',
+        'sensor.blink_charging_23_napelsstraat_antwerpen_2'
+      ] %}
+      {% set available = namespace(count=0) %}
+      {% for sensor in sensors %}
+        {% if states(sensor) | lower == 'available' %}
+          {% set available.count = available.count + 1 %}
+        {% endif %}
+      {% endfor %}
+      {{ available.count }}
+    attribute_templates:
+      total_spots: >
+        {% set sensors = [
+          'sensor.blink_charging_23_napelsstraat_antwerpen',
+          'sensor.blink_charging_23_napelsstraat_antwerpen_2'
+        ] %}
+        {{ sensors | length }}
+      friendly_text: >
+        {% set sensors = [
+          'sensor.blink_charging_23_napelsstraat_antwerpen',
+          'sensor.blink_charging_23_napelsstraat_antwerpen_2'
+        ] %}
+        {% set available = namespace(count=0) %}
+        {% for sensor in sensors %}
+          {% if states(sensor) | lower == 'available' %}
+            {% set available.count = available.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        {{ available.count }}/{{ sensors | length }} Available
+
+  cadixstraat_chargers:
+    friendly_name: "Cadixstraat Available Chargers"
+    unique_id: cadixstraat_available_chargers
+    value_template: >
+      {% set sensors = [
+        'sensor.tcb_45_cadixstraat_antwerpen_centrum',
+        'sensor.tcb_45_cadixstraat_antwerpen_centrum_2',
+        'sensor.tcb_45_cadixstraat_antwerpen_centrum_3',
+        'sensor.tcb_45_cadixstraat_antwerpen_centrum_4',
+        'sensor.tcb_45_cadixstraat_antwerpen_centrum_5',
+        'sensor.tcb_45_cadixstraat_antwerpen_centrum_6'
+      ] %}
+      {% set available = namespace(count=0) %}
+      {% for sensor in sensors %}
+        {% if states(sensor) | lower == 'available' %}
+          {% set available.count = available.count + 1 %}
+        {% endif %}
+      {% endfor %}
+      {{ available.count }}
+    attribute_templates:
+      total_spots: >
+        {% set sensors = [
+          'sensor.tcb_45_cadixstraat_antwerpen_centrum',
+          'sensor.tcb_45_cadixstraat_antwerpen_centrum_2',
+          'sensor.tcb_45_cadixstraat_antwerpen_centrum_3',
+          'sensor.tcb_45_cadixstraat_antwerpen_centrum_4',
+          'sensor.tcb_45_cadixstraat_antwerpen_centrum_5',
+          'sensor.tcb_45_cadixstraat_antwerpen_centrum_6'
+        ] %}
+        {{ sensors | length }}
+      friendly_text: >
+        {% set sensors = [
+          'sensor.tcb_45_cadixstraat_antwerpen_centrum',
+          'sensor.tcb_45_cadixstraat_antwerpen_centrum_2',
+          'sensor.tcb_45_cadixstraat_antwerpen_centrum_3',
+          'sensor.tcb_45_cadixstraat_antwerpen_centrum_4',
+          'sensor.tcb_45_cadixstraat_antwerpen_centrum_5',
+          'sensor.tcb_45_cadixstraat_antwerpen_centrum_6'
+        ] %}
+        {% set available = namespace(count=0) %}
+        {% for sensor in sensors %}
+          {% if states(sensor) | lower == 'available' %}
+            {% set available.count = available.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        {{ available.count }}/{{ sensors | length }} Available
+
+  madrasstraat_chargers:
+    friendly_name: "Madrasstraat Available Chargers"
+    unique_id: madrasstraat_available_chargers
+    value_template: >
+      {% set sensors = [
+        'sensor.tcb_58_madrasstraat_antwerpen',
+        'sensor.tcb_58_madrasstraat_antwerpen_2',
+        'sensor.tcb_58_madrasstraat_antwerpen_3',
+        'sensor.tcb_58_madrasstraat_antwerpen_4'
+      ] %}
+      {% set available = namespace(count=0) %}
+      {% for sensor in sensors %}
+        {% if states(sensor) | lower == 'available' %}
+          {% set available.count = available.count + 1 %}
+        {% endif %}
+      {% endfor %}
+      {{ available.count }}
+    attribute_templates:
+      total_spots: >
+        {% set sensors = [
+          'sensor.tcb_58_madrasstraat_antwerpen',
+          'sensor.tcb_58_madrasstraat_antwerpen_2',
+          'sensor.tcb_58_madrasstraat_antwerpen_3',
+          'sensor.tcb_58_madrasstraat_antwerpen_4'
+        ] %}
+        {{ sensors | length }}
+      friendly_text: >
+        {% set sensors = [
+          'sensor.tcb_58_madrasstraat_antwerpen',
+          'sensor.tcb_58_madrasstraat_antwerpen_2',
+          'sensor.tcb_58_madrasstraat_antwerpen_3',
+          'sensor.tcb_58_madrasstraat_antwerpen_4'
+        ] %}
+        {% set available = namespace(count=0) %}
+        {% for sensor in sensors %}
+          {% if states(sensor) | lower == 'available' %}
+            {% set available.count = available.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        {{ available.count }}/{{ sensors | length }} Available 
