@@ -1,0 +1,46 @@
+alias: EV Charging Notification
+description: ""
+triggers:
+  - device_id: e91279728be012c57bd3f165398a55aa
+    domain: device_tracker
+    entity_id: fbf5ada71c61baaa1ada0b0d901c94ee
+    type: enters
+    trigger: device
+    zone: zone.ev_trigger_zone
+conditions:
+  - type: is_connected
+    condition: device
+    device_id: e91279728be012c57bd3f165398a55aa
+    entity_id: 7a0727804abac11414f69263cdda316a
+    domain: binary_sensor
+actions:
+  - variables:
+      cadix: "{{ states('sensor.cadixstraat_chargers') | int }}"
+      madras: "{{ states('sensor.madrasstraat_chargers') | int }}"
+      napels: "{{ states('sensor.napelsstraat_chargers') | int }}"
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ cadix + madras + napels > 0 }}"
+        sequence:
+          - action: notify.mobile_app_pixel_8
+            metadata: {}
+            data:
+              title: You can charge!
+              message: |
+                CADIX {{ cadix }} / MADRAS {{ madras }} / NAPELS {{ napels }}
+              data:
+                car_ui: true
+                ttl: 0
+                priority: high
+    default:
+      - action: notify.mobile_app_pixel_8
+        metadata: {}
+        data:
+          title: sorry :(
+          message: No chargers free
+          data:
+            car_ui: true
+            ttl: 0
+            priority: high
+mode: single

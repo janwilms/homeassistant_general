@@ -15,6 +15,12 @@ sensors:
         {% endif %}
       {% endfor %}
       {{ available.count }}
+    icon_template: >-
+      {% if states(this.entity_id) | int > 0 %}
+        hass:ev-station-outline#00c853
+      {% else %}
+        hass:ev-station-outline#ff0000
+      {% endif %}
     attribute_templates:
       total_spots: >
         {% set sensors = [
@@ -54,6 +60,12 @@ sensors:
         {% endif %}
       {% endfor %}
       {{ available.count }}
+    icon_template: >-
+      {% if states(this.entity_id) | int > 0 %}
+        hass:ev-station-outline#00c853
+      {% else %}
+        hass:ev-station-outline#ff0000
+      {% endif %}
     attribute_templates:
       total_spots: >
         {% set sensors = [
@@ -99,6 +111,12 @@ sensors:
         {% endif %}
       {% endfor %}
       {{ available.count }}
+    icon_template: >-
+      {% if states(this.entity_id) | int > 0 %}
+        hass:ev-station-outline#00c853
+      {% else %}
+        hass:ev-station-outline#ff0000
+      {% endif %}
     attribute_templates:
       total_spots: >
         {% set sensors = [
