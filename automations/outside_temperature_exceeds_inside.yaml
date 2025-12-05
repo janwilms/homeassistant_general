@@ -1,0 +1,64 @@
+alias: Outside Temperature Exceeds Inside Temperature
+description: Alert when outside temperature is higher than any inside sensor
+triggers:
+  - entity_id: sensor.outside_sensor_temperature_3
+    trigger: state
+conditions:
+  - condition: template
+    value_template: >
+      {% set outside_temp = states('sensor.outside_sensor_temperature_3') |
+      float %} {% set previous_outside_temp = trigger.from_state.state | float
+      %} {% set inside_avg_temp = states('sensor.inside_average_temperature') |
+      float %}
+
+      {# Check if current outside temp exceeds average inside temp #} {% set
+      currently_exceeded = outside_temp > inside_avg_temp %}
+
+      {# Check if previous outside temp was NOT exceeding average inside temp #}
+      {% set previously_exceeded = previous_outside_temp > inside_avg_temp %}
+
+      {# Only trigger if currently exceeding AND previously not exceeding #} {{
+      currently_exceeded and not previously_exceeded }}
+  - condition: template
+    value_template: >
+      {% set last_triggered = state_attr(this.entity_id, 'last_triggered') %} {%
+      if last_triggered is none %}
+        true
+      {% else %}
+        {% set time_diff = (now() - last_triggered).total_seconds() / 3600 %}
+        {{ time_diff >= 1 }}
+      {% endif %}
+    enabled: true
+  - condition: zone
+    entity_id: device_tracker.pixel_8_4
+    zone: zone.home
+  - condition: time
+    after: "08:00:00"
+    before: "22:00:00"
+actions:
+  - variables:
+      outside_temp: "{{ states('sensor.outside_sensor_temperature_3') | float | round(1) }}"
+      inside_avg_temp: "{{ states('sensor.inside_average_temperature') | float | round(1) }}"
+  - action: notify.mobile_app_d_anvers_edge_beacon_8
+    metadata: {}
+    data:
+      title: 🌡️ Outside temperature alert!
+      message: >
+        Outside: {{ outside_temp }}°C exceeds inside average: {{ inside_avg_temp
+        }}°C
+      data:
+        car_ui: true
+        ttl: 0
+        priority: high
+        importance: high
+  - target:
+      entity_id:
+        - tts.piper
+    data:
+      media_player_entity_id: media_player.all_but_bed_speakers
+      message: >
+        Commander, outside temperature is {{ outside_temp }} degrees, it is now
+        exceeding the inside average of {{ inside_avg_temp }} degrees. Please
+        take measures to keep out the heat.
+    action: tts.speak
+mode: single

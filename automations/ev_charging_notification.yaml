@@ -1,29 +1,27 @@
-alias: EV Charging Notification
+alias: Arriving Home - EV Charging Notification
 description: ""
 triggers:
-  - device_id: e91279728be012c57bd3f165398a55aa
-    domain: device_tracker
-    entity_id: fbf5ada71c61baaa1ada0b0d901c94ee
-    type: enters
-    trigger: device
+  - trigger: zone
+    entity_id: device_tracker.pixel_8_4
     zone: zone.ev_trigger_zone
+    event: enter
 conditions:
   - type: is_connected
     condition: device
-    device_id: e91279728be012c57bd3f165398a55aa
-    entity_id: 7a0727804abac11414f69263cdda316a
+    device_id: 873ec1cb2655541330375c818cc941da
+    entity_id: 406a41dc5528a0b8e891c5d2dfdaa777
     domain: binary_sensor
 actions:
   - variables:
-      cadix: "{{ states('sensor.cadixstraat_chargers') | int }}"
-      madras: "{{ states('sensor.madrasstraat_chargers') | int }}"
-      napels: "{{ states('sensor.napelsstraat_chargers') | int }}"
+      cadix: "{{ states('sensor.cadixstraat_chargers') | int(0) }}"
+      madras: "{{ states('sensor.madrasstraat_chargers') | int(0) }}"
+      napels: "{{ states('sensor.napelsstraat_chargers') | int(0) }}"
   - choose:
       - conditions:
           - condition: template
             value_template: "{{ cadix + madras + napels > 0 }}"
         sequence:
-          - action: notify.mobile_app_pixel_8
+          - action: notify.mobile_app_d_anvers_edge_beacon_8
             metadata: {}
             data:
               title: You can charge!
@@ -33,8 +31,9 @@ actions:
                 car_ui: true
                 ttl: 0
                 priority: high
+                importance: high
     default:
-      - action: notify.mobile_app_pixel_8
+      - action: notify.mobile_app_d_anvers_edge_beacon_8
         metadata: {}
         data:
           title: sorry :(
@@ -43,4 +42,5 @@ actions:
             car_ui: true
             ttl: 0
             priority: high
+            importance: high
 mode: single

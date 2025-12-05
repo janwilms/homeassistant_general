@@ -1,0 +1,381 @@
+views:
+  - type: sections
+    max_columns: 4
+    title: Overview
+    path: overview
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading_style: title
+            heading: Weather and Forecast
+          - type: custom:weather-card
+            entity: weather.forecast_home
+            grid_options:
+              columns: 12
+              rows: auto
+          - show_current: false
+            show_forecast: true
+            type: weather-forecast
+            entity: weather.forecast_home
+            forecast_type: hourly
+            grid_options:
+              columns: 24
+              rows: 2
+            forecast_slots: 12
+          - type: heading
+            icon: ''
+            heading: Home
+            heading_style: title
+          - type: custom:mini-graph-card
+            name: Outside Temperature
+            entities:
+              - type: sensor
+                entity: sensor.outside_sensor_temperature_3
+                name: Outside
+            hours_to_show: 72
+            points_per_hour: 4
+            height: 60
+            color_thresholds:
+              - value: 16
+                color: '#0000cc'
+              - value: 18
+                color: '#330066'
+              - value: 20
+                color: '#ff6600'
+              - value: 22
+                color: '#cc3333'
+              - value: 24
+                color: '#990000'
+              - value: 26
+                color: '#660000'
+            animate: true
+          - type: custom:mini-graph-card
+            name: Outside Humidity
+            entities:
+              - type: sensor
+                entity: sensor.outside_sensor_humidity_4
+                name: Outside
+            hours_to_show: 72
+            points_per_hour: 4
+            height: 60
+            color_thresholds:
+              - value: 30
+                color: '#e6f7ff'
+              - value: 40
+                color: '#bae7ff'
+              - value: 50
+                color: '#91d5ff'
+              - value: 60
+                color: '#69c0ff'
+            animate: true
+          - type: custom:mini-graph-card
+            name: Inside Average Temperature
+            entities:
+              - type: sensor
+                entity: sensor.inside_average_temperature
+                name: Average
+            hours_to_show: 72
+            points_per_hour: 4
+            height: 60
+            color_thresholds:
+              - value: 16
+                color: '#0000cc'
+              - value: 18
+                color: '#330066'
+              - value: 20
+                color: '#ff6600'
+              - value: 22
+                color: '#cc3333'
+              - value: 24
+                color: '#990000'
+              - value: 26
+                color: '#660000'
+            animate: true
+          - type: custom:mini-graph-card
+            name: Inside Average Humidity
+            entities:
+              - type: sensor
+                entity: sensor.inside_average_humidity
+                name: Average
+            hours_to_show: 72
+            points_per_hour: 4
+            height: 60
+            color_thresholds:
+              - value: 30
+                color: '#e6f7ff'
+              - value: 40
+                color: '#bae7ff'
+              - value: 50
+                color: '#91d5ff'
+              - value: 60
+                color: '#69c0ff'
+            animate: true
+          - type: thermostat
+            entity: climate.family_room
+          - type: thermostat
+            entity: climate.bedroom_trv_thermostat_2
+        column_span: 2
+      - type: grid
+        cards:
+          - type: custom:mini-graph-card
+            name: Living Room Temperature
+            entities:
+              - type: sensor
+                entity: sensor.family_room_temperature
+                name: Temperature
+            hours_to_show: 72
+            points_per_hour: 4
+            height: 50
+            color_thresholds:
+              - value: 16
+                color: '#0000cc'
+              - value: 18
+                color: '#330066'
+              - value: 20
+                color: '#ff6600'
+              - value: 22
+                color: '#cc3333'
+              - value: 24
+                color: '#990000'
+              - value: 26
+                color: '#660000'
+            animate: true
+          - type: custom:mini-graph-card
+            name: Living Room Humidity
+            entities:
+              - type: sensor
+                entity: sensor.family_room_humidity
+                name: Humidity
+            hours_to_show: 72
+            points_per_hour: 4
+            height: 50
+            color_thresholds:
+              - value: 30
+                color: '#e6f7ff'
+              - value: 40
+                color: '#bae7ff'
+              - value: 50
+                color: '#91d5ff'
+              - value: 60
+                color: '#69c0ff'
+            animate: true
+          - type: custom:mini-graph-card
+            name: Hallway Temperature
+            entities:
+              - type: sensor
+                entity: sensor.temp_hallway_temperature_4
+                name: Bedroom
+            hours_to_show: 72
+            points_per_hour: 4
+            height: 50
+            color_thresholds:
+              - value: 16
+                color: '#0000cc'
+              - value: 18
+                color: '#330066'
+              - value: 20
+                color: '#ff6600'
+              - value: 22
+                color: '#cc3333'
+              - value: 24
+                color: '#990000'
+              - value: 26
+                color: '#660000'
+            animate: true
+          - type: custom:mini-graph-card
+            name: Hallway Humidity
+            entities:
+              - type: sensor
+                entity: sensor.temp_hallway_humidity_5
+                name: Hallway
+            hours_to_show: 72
+            points_per_hour: 4
+            height: 50
+            color_thresholds:
+              - value: 30
+                color: '#e6f7ff'
+              - value: 40
+                color: '#bae7ff'
+              - value: 50
+                color: '#91d5ff'
+              - value: 60
+                color: '#69c0ff'
+            animate: true
+          - type: custom:mini-graph-card
+            name: Computer Room Temperature
+            entities:
+              - type: sensor
+                entity: sensor.lumi_lumi_weather_temp_computer_roomerature_3
+                name: Computer Room
+            hours_to_show: 72
+            points_per_hour: 4
+            height: 50
+            color_thresholds:
+              - value: 16
+                color: '#0000cc'
+              - value: 18
+                color: '#330066'
+              - value: 20
+                color: '#ff6600'
+              - value: 22
+                color: '#cc3333'
+              - value: 24
+                color: '#990000'
+              - value: 26
+                color: '#660000'
+            animate: true
+          - type: custom:mini-graph-card
+            name: Computer Room Humidity
+            entities:
+              - type: sensor
+                entity: sensor.lumi_lumi_weather_humidity_3
+                name: Computer Room
+            hours_to_show: 72
+            points_per_hour: 4
+            height: 50
+            color_thresholds:
+              - value: 30
+                color: '#e6f7ff'
+              - value: 40
+                color: '#bae7ff'
+              - value: 50
+                color: '#91d5ff'
+              - value: 60
+                color: '#69c0ff'
+            animate: true
+          - type: custom:mini-graph-card
+            name: Bedroom Temperature
+            entities:
+              - type: sensor
+                entity: sensor.lumi_lumi_weather_temperature_2
+                name: Bedroom
+            hours_to_show: 72
+            points_per_hour: 4
+            height: 50
+            color_thresholds:
+              - value: 16
+                color: '#0000cc'
+              - value: 18
+                color: '#330066'
+              - value: 20
+                color: '#ff6600'
+              - value: 22
+                color: '#cc3333'
+              - value: 24
+                color: '#990000'
+              - value: 26
+                color: '#660000'
+            animate: true
+          - type: custom:mini-graph-card
+            name: Bedroom Humidity
+            entities:
+              - type: sensor
+                entity: sensor.lumi_lumi_weather_humidity_2
+                name: Bedroom
+            hours_to_show: 72
+            points_per_hour: 4
+            height: 50
+            color_thresholds:
+              - value: 30
+                color: '#e6f7ff'
+              - value: 40
+                color: '#bae7ff'
+              - value: 50
+                color: '#91d5ff'
+              - value: 60
+                color: '#69c0ff'
+            animate: true
+          - type: custom:mini-graph-card
+            name: Kitchen Temperature
+            entities:
+              - type: sensor
+                entity: sensor.temp_kitchen_temperature_4
+                name: Bedroom
+            hours_to_show: 72
+            points_per_hour: 4
+            height: 50
+            color_thresholds:
+              - value: 16
+                color: '#0000cc'
+              - value: 18
+                color: '#330066'
+              - value: 20
+                color: '#ff6600'
+              - value: 22
+                color: '#cc3333'
+              - value: 24
+                color: '#990000'
+              - value: 26
+                color: '#660000'
+            animate: true
+          - type: custom:mini-graph-card
+            name: Kitchen Humidity
+            entities:
+              - type: sensor
+                entity: sensor.temp_kitchen_humidity_5
+                name: Bedroom
+            hours_to_show: 72
+            points_per_hour: 4
+            height: 50
+            color_thresholds:
+              - value: 30
+                color: '#e6f7ff'
+              - value: 40
+                color: '#bae7ff'
+              - value: 50
+                color: '#91d5ff'
+              - value: 60
+                color: '#69c0ff'
+            animate: true
+          - type: custom:mini-graph-card
+            name: Bathroom Temperature
+            entities:
+              - type: sensor
+                entity: sensor.temp_bathroom_temperature_4
+                name: Bedroom
+            hours_to_show: 72
+            points_per_hour: 4
+            height: 50
+            color_thresholds:
+              - value: 16
+                color: '#0000cc'
+              - value: 18
+                color: '#330066'
+              - value: 20
+                color: '#ff6600'
+              - value: 22
+                color: '#cc3333'
+              - value: 24
+                color: '#990000'
+              - value: 26
+                color: '#660000'
+            animate: true
+          - type: custom:mini-graph-card
+            name: Bathroom Humidity
+            entities:
+              - type: sensor
+                entity: sensor.temp_bathroom_humidity_5
+                name: Bedroom
+            hours_to_show: 72
+            points_per_hour: 4
+            height: 50
+            color_thresholds:
+              - value: 30
+                color: '#e6f7ff'
+              - value: 40
+                color: '#bae7ff'
+              - value: 50
+                color: '#91d5ff'
+              - value: 60
+                color: '#69c0ff'
+            animate: true
+        column_span: 2
+    background:
+      opacity: 33
+      alignment: center
+      size: cover
+      repeat: repeat
+      attachment: fixed
+      image: /api/image/serve/b91c4e85a4816f5382413eece8c3248e/original
+    cards: []

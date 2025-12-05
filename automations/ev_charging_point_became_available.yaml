@@ -1,0 +1,48 @@
+alias: "EV Charging Point Became Available"
+description: "Notify when a charging point becomes available while in zone with low battery"
+trigger:
+  - platform: state
+    entity_id:
+      - sensor.cadixstraat_chargers
+      - sensor.madrasstraat_chargers
+      - sensor.napelsstraat_chargers
+condition:
+  - condition: template
+    value_template: >
+      {% set current_cadix = states('sensor.cadixstraat_chargers') | int(0) %}
+      {% set current_madras = states('sensor.madrasstraat_chargers') | int(0) %}
+      {% set current_napels = states('sensor.napelsstraat_chargers') | int(0) %}
+      {% set current_total = current_cadix + current_madras + current_napels %}
+      
+      {% set previous_cadix = trigger.from_state.state | int(0) if trigger.entity_id == 'sensor.cadixstraat_chargers' else states('sensor.cadixstraat_chargers') | int(0) %}
+      {% set previous_madras = trigger.from_state.state | int(0) if trigger.entity_id == 'sensor.madrasstraat_chargers' else states('sensor.madrasstraat_chargers') | int(0) %}
+      {% set previous_napels = trigger.from_state.state | int(0) if trigger.entity_id == 'sensor.napelsstraat_chargers' else states('sensor.napelsstraat_chargers') | int(0) %}
+      {% set previous_total = previous_cadix + previous_madras + previous_napels %}
+      
+      {{ current_total > previous_total }}
+  - condition: zone
+    entity_id: device_tracker.fbf5ada71c61baaa1ada0b0d901c94ee  # Your phone's device tracker
+    zone: zone.ev_trigger_zone
+  - condition: zone
+    entity_id: device_tracker.2cjn170_caitlyn_device_tracker  # Your car's device tracker
+    zone: zone.ev_trigger_zone
+  - condition: numeric_state
+    entity_id: sensor.car_battery_level  # Replace with your actual car battery sensor
+    below: 50
+action:
+  - variables:
+      cadix: "{{ states('sensor.cadixstraat_chargers') | int(0) }}"
+      madras: "{{ states('sensor.madrasstraat_chargers') | int(0) }}"
+      napels: "{{ states('sensor.napelsstraat_chargers') | int(0) }}"
+  - action: notify.mobile_app_d_anvers_edge_beacon_8
+    metadata: {}
+    data:
+      title: "New charging spot available!"
+      message: >
+        CADIX {{ cadix }} / MADRAS {{ madras }} / NAPELS {{ napels }}
+      data:
+        car_ui: true
+        ttl: 0
+        priority: high
+        importance: high
+mode: single 

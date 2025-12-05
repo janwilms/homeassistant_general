@@ -1,0 +1,8 @@
+- sensor:
+    - unique_id: kmi_galgenweel_wind_speed_knots
+      name: "Windsnelheid (knopen)"
+      unit_of_measurement: "kn"
+      state: >
+        {% set kmh = states('sensor.kmi_galgenweel_current_wind_speed') | float(0) %}
+        {{ (kmh * 0.539957) | round(1) }}
+

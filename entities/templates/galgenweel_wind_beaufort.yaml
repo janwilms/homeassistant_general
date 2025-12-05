@@ -1,0 +1,21 @@
+- sensor:
+    - unique_id: galgenweel_wind_beaufort
+      name: "Windsnelheid (Bft)"
+      unit_of_measurement: "Bft"
+      state: >
+        {% set speed = states('sensor.kmi_galgenweel_current_wind_speed') | float(0) %}
+        {% if speed < 1 %} 0
+        {% elif speed < 6 %} 1
+        {% elif speed < 12 %} 2
+        {% elif speed < 20 %} 3
+        {% elif speed < 29 %} 4
+        {% elif speed < 39 %} 5
+        {% elif speed < 50 %} 6
+        {% elif speed < 62 %} 7
+        {% elif speed < 75 %} 8
+        {% elif speed < 89 %} 9
+        {% elif speed < 103 %} 10
+        {% elif speed < 118 %} 11
+        {% else %} 12
+        {% endif %}
+

@@ -1,0 +1,10 @@
+- sensor:
+    - unique_id: fitbit_sleep_time_hhmm
+      name: "Fitbit Sleep Time (hh:mm)"
+      icon: mdi:clock-outline
+      state: >
+        {% set m = states('sensor.jan_w_sleep_minutes_asleep') | int(0) %}
+        {% set h = m // 60 %}
+        {% set r = m % 60 %}
+        {{ "%02d:%02d" | format(h, r) }}
+

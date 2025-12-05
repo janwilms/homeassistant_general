@@ -1,0 +1,7 @@
+- sensor:
+    - unique_id: kmi_galgenweel_current_wind_bearing_clean
+      name: "Wind Bearing Clean"
+      state: >
+        {% set val = states('sensor.kmi_galgenweel_current_wind_bearing') %}
+        {{ val.replace('°', '') | float(0) }}
+

@@ -1,0 +1,12 @@
+- sensor:
+    - unique_id: galgenweel_wind_gust_clean
+      name: "Clean Wind Gust"
+      unit_of_measurement: "km/h"
+      state: >
+        {% set gust = states('sensor.kmi_galgenweel_curent_wind_gust_speed') %}
+        {% if gust | float(0) > 0 %}
+          {{ gust | float }}
+        {% else %}
+          0
+        {% endif %}
+

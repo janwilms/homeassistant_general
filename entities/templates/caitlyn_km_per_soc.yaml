@@ -1,0 +1,13 @@
+- sensor:
+    - unique_id: caitlyn_ev_range_per_soc
+      unit_of_measurement: km/%
+      name: Caitlyn EV Range per SOC %
+      state: >
+        {% set soc = states('sensor.2cjn170_caitlyn_state_of_charge') | float(0) %}
+        {% set evrange = states('sensor.2cjn170_caitlyn_range_electric') | float(0) %}
+        {% if soc > 0 %}
+          {{ (evrange / soc) | round(2) }}
+        {% else %}
+          0
+        {% endif %}
+

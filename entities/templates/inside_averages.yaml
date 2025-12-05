@@ -1,0 +1,105 @@
+- sensor:
+    - unique_id: inside_average_temperature
+      name: "Inside Average Temperature"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      icon: mdi:thermometer
+      state: >
+        {% set sensors = [
+          'sensor.family_room_temperature',
+          'sensor.temp_hallway_temperature_4',
+          'sensor.lumi_lumi_weather_temp_computer_roomerature_3',
+          'sensor.lumi_lumi_weather_temperature_2',
+          'sensor.temp_kitchen_temperature_4',
+          'sensor.temp_bathroom_temperature_4'
+        ] %}
+        {% set ns = namespace(sum=0, count=0) %}
+        {% for sensor in sensors %}
+          {% set state = states(sensor) %}
+          {% if state not in ['unknown', 'unavailable', 'none', '', 'None'] and state is not none %}
+            {% set temp_val = state | float(0) %}
+            {% if temp_val > -30 and temp_val < 50 %}
+              {% set ns.sum = ns.sum + temp_val %}
+              {% set ns.count = ns.count + 1 %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {% if ns.count > 0 %}
+          {{ (ns.sum / ns.count) | round(1) }}
+        {% else %}
+          0
+        {% endif %}
+      attributes:
+        sensor_count: >
+          {% set sensors = [
+            'sensor.family_room_temperature',
+            'sensor.temp_hallway_temperature_4',
+            'sensor.lumi_lumi_weather_temp_computer_roomerature_3',
+            'sensor.lumi_lumi_weather_temperature_2',
+            'sensor.temp_kitchen_temperature_4',
+            'sensor.temp_bathroom_temperature_4'
+          ] %}
+          {% set ns = namespace(count=0) %}
+          {% for sensor in sensors %}
+            {% set state = states(sensor) %}
+            {% if state not in ['unknown', 'unavailable', 'none', '', 'None'] and state is not none %}
+              {% set temp_val = state | float(0) %}
+              {% if temp_val > -30 and temp_val < 50 %}
+                {% set ns.count = ns.count + 1 %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.count }}
+
+    - unique_id: inside_average_humidity
+      name: "Inside Average Humidity"
+      unit_of_measurement: "%"
+      device_class: humidity
+      icon: mdi:water-percent
+      state: >
+        {% set sensors = [
+          'sensor.family_room_humidity',
+          'sensor.temp_hallway_humidity_5',
+          'sensor.lumi_lumi_weather_humidity_3',
+          'sensor.lumi_lumi_weather_humidity_2',
+          'sensor.temp_kitchen_humidity_5',
+          'sensor.temp_bathroom_humidity_5'
+        ] %}
+        {% set ns = namespace(sum=0, count=0) %}
+        {% for sensor in sensors %}
+          {% set state = states(sensor) %}
+          {% if state not in ['unknown', 'unavailable', 'none', '', 'None'] and state is not none %}
+            {% set humidity_val = state | float(0) %}
+            {% if humidity_val > 0 and humidity_val <= 100 %}
+              {% set ns.sum = ns.sum + humidity_val %}
+              {% set ns.count = ns.count + 1 %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {% if ns.count > 0 %}
+          {{ (ns.sum / ns.count) | round(1) }}
+        {% else %}
+          0
+        {% endif %}
+      attributes:
+        sensor_count: >
+          {% set sensors = [
+            'sensor.family_room_humidity',
+            'sensor.temp_hallway_humidity_5',
+            'sensor.lumi_lumi_weather_humidity_3',
+            'sensor.lumi_lumi_weather_humidity_2',
+            'sensor.temp_kitchen_humidity_5',
+            'sensor.temp_bathroom_humidity_5'
+          ] %}
+          {% set ns = namespace(count=0) %}
+          {% for sensor in sensors %}
+            {% set state = states(sensor) %}
+            {% if state not in ['unknown', 'unavailable', 'none', '', 'None'] and state is not none %}
+              {% set humidity_val = state | float(0) %}
+              {% if humidity_val > 0 and humidity_val <= 100 %}
+                {% set ns.count = ns.count + 1 %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.count }}
+

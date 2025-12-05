@@ -1,0 +1,23 @@
+- sensor:
+    - name: "Caitlyn End of Charge Time"
+      unique_id: caitlyn_end_of_charge_time
+      state: >
+        {% set end_of_charge = states('sensor.2cjn170_caitlyn_end_of_charge') %}
+        {% if end_of_charge not in ['unknown', 'unavailable', 'none', '', 'None'] and end_of_charge is not none and 'T' in end_of_charge %}
+          {% set time_part = end_of_charge.split('T')[1] %}
+          {% if '+' in time_part %}
+            {{ time_part.split('+')[0] }}
+          {% elif '-' in time_part %}
+            {% set time_with_tz = time_part.split('-', 1) %}
+            {% if time_with_tz[1] | length <= 5 %}
+              {{ time_with_tz[0] }}
+            {% else %}
+              {{ time_part }}
+            {% endif %}
+          {% else %}
+            {{ time_part }}
+          {% endif %}
+        {% else %}
+          unknown
+        {% endif %}
+

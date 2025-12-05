@@ -1,0 +1,8 @@
+- sensor:
+    - unique_id: galgenweel_wind_direction_compass
+      name: "Windrichting"
+      state: >
+        {% set d = states('sensor.kmi_galgenweel_wind_bearing') | float(0) %}
+        {% set dirs = ['N','NNO','NO','ONO','O','OZO','ZO','ZZO','Z','ZZW','ZW','WZW','W','WNW','NW','NNW'] %}
+        {{ dirs[ ((d + 11.25) % 360) // 22.5 | int ] }}
+

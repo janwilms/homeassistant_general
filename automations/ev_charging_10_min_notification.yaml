@@ -1,0 +1,37 @@
+alias: Car – 10 min before charge complete
+description: >-
+  Announce when the car will finish charging in ~10 minutes, only if my phone is
+  home and the car is in the Larger Home Zone.
+triggers:
+  - id: ten_min_window
+    value_template: >
+      {% set ts = states(est_end_sensor) %} {% if ts in [none, 'unknown',
+      'unavailable'] %}
+        false
+      {% else %}
+        {% set secs = as_timestamp(ts) - now().timestamp() %}
+        {{ 570 <= secs <= 630 }}   # 9.5–10.5 minutes left
+      {% endif %}
+    trigger: template
+conditions:
+  - condition: zone
+    entity_id: device_tracker.pixel_8_3
+    zone: zone.home
+  - condition: zone
+    entity_id: device_tracker.2cjn170_caitlyn_device_tracker
+    zone: zone.larger_home
+  - condition: template
+    value_template: >
+      {% set ts = states(est_end_sensor) %} {{ ts not in [none, 'unknown',
+      'unavailable'] and as_timestamp(ts) > now().timestamp() }}
+actions:
+  - target:
+      entity_id: tts.piper
+    data:
+      media_player_entity_id: "{{ media_player_target }}"
+      message: Commander, your vehicle will be done charging in 10 minutes.
+    action: tts.speak
+mode: single
+variables:
+  est_end_sensor: sensor.2cjn170_caitlyn_end_of_charge
+  media_player_target: media_player.all_but_bed_speakers

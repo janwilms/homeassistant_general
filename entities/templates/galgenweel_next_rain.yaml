@@ -1,0 +1,17 @@
+- sensor:
+    - unique_id: galgenweel_next_rain
+      name: "Rain in the next 6h (mm)"
+      unit_of_measurement: "mm"
+      state: >
+        {% set forecasts = state_attr('weather.kmi_galgenweel', 'forecast_radar') %}
+        {% if forecasts %}
+          {% set future = forecasts
+              | selectattr('datetime','ge',(now()).strftime('%Y-%m-%dT%H')) 
+              | list 
+              | slice(0, 6) %}
+          {% set sum = future | map(attribute='precipitation') | map('float') | sum %}
+          {{ sum | round(1) }}
+        {% else %}
+          0
+        {% endif %}
+
