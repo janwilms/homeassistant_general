@@ -1,0 +1,190 @@
+views:
+  - type: sections
+    max_columns: 4
+    title: Overview (sections)
+    path: overview-sections
+    icon: mdi:home
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Stats
+            heading_style: title
+            icon: mdi:chart-areaspline-variant
+          - type: tile
+            entity: sensor.caitlyn_total_range
+            features_position: bottom
+            vertical: false
+            name: Total Range
+            icon: mdi:arrow-collapse-right
+          - type: tile
+            entity: sensor.2cjn170_caitlyn_range_liquid
+            features_position: bottom
+            vertical: false
+            name: Fuel Range
+          - type: tile
+            entity: sensor.2cjn170_caitlyn_odometer
+            features_position: bottom
+            vertical: false
+            name: Total Distance
+          - type: tile
+            entity: sensor.2cjn170_caitlyn_range_electric
+            features_position: bottom
+            vertical: false
+            name: EV Range
+          - show_name: false
+            show_icon: true
+            show_state: true
+            type: glance
+            entities:
+              - entity: lock.2cjn170_caitlyn_lock
+              - entity: binary_sensor.2cjn170_caitlyn_windows_closed
+              - entity: binary_sensor.2cjn170_caitlyn_park_brake_status
+              - entity: binary_sensor.2cjn170_caitlyn_low_wash_water_warning
+          - type: heading
+            icon: mdi:gesture-tap
+            heading: Actions
+            heading_style: title
+          - show_name: true
+            show_icon: true
+            show_state: false
+            type: glance
+            entities:
+              - entity: binary_sensor.2cjn170_caitlyn_preclimate_status
+              - entity: button.2cjn170_caitlyn_preclimate_start
+                name: Start
+                icon: mdi:play
+                tap_action:
+                  action: toggle
+              - entity: button.2cjn170_caitlyn_preclimate_stop
+                name: Stop
+                icon: mdi:stop
+                tap_action:
+                  action: toggle
+            state_color: true
+      - type: grid
+        cards:
+          - type: heading
+            heading_style: title
+            heading: Fuel & Electric Stats
+            icon: mdi:chart-areaspline-variant
+          - type: custom:mini-graph-card
+            name: Fuel history (14d)
+            entities:
+              - type: sensor
+                entity: sensor.2cjn170_caitlyn_fuel_level
+            hours_to_show: 336
+            points_per_hour: 4
+            height: 150
+            animate: true
+            upper_bound: 100
+            lower_bound: 0
+            color_thresholds:
+              - value: 1
+                color: red
+              - value: 15
+                color: red
+              - value: 40
+                color: orange
+              - value: 60
+                color: green
+          - type: custom:mini-graph-card
+            name: Battery history (14d)
+            entities:
+              - type: sensor
+                entity: sensor.2cjn170_caitlyn_state_of_charge
+            hours_to_show: 336
+            points_per_hour: 2
+            height: 150
+            animate: true
+            color_thresholds:
+              - value: 1
+                color: red
+              - value: 15
+                color: red
+              - value: 50
+                color: orange
+              - value: 70
+                color: green
+          - type: custom:mini-graph-card
+            name: EV Range per SOC % (14d)
+            entities:
+              - type: sensor
+                entity: sensor.caitlyn_ev_range_per_soc
+            icon: mdi:battery-high
+            hours_to_show: 336
+            points_per_hour: 2
+            height: 150
+            animate: true
+            color_thresholds:
+              - value: 0.3
+                color: red
+              - value: 0.4
+                color: orange
+              - value: 0.6
+                color: green
+      - type: grid
+        cards:
+          - type: heading
+            heading_style: title
+            heading: Charging
+            icon: mdi:lightning-bolt
+          - type: entity
+            entity: sensor.2cjn170_caitlyn_end_of_charge
+            icon: mdi:clock-check-outline
+            name: Estimated End of Charge
+            grid_options:
+              columns: 12
+              rows: 2
+          - type: custom:mini-graph-card
+            name: Charge Power (4h)
+            entities:
+              - type: sensor
+                entity: sensor.2cjn170_caitlyn_charging_power
+            hours_to_show: 4
+            points_per_hour: 12
+            height: 150
+            animate: true
+            upper_bound: 8
+            lower_bound: 0
+            color_thresholds:
+              - value: 0
+                color: black
+              - value: 3
+                color: red
+              - value: 4
+                color: orange
+              - value: 7
+                color: green
+          - type: entities
+            entities:
+              - entity: sensor.cadixstraat_chargers
+                icon: mdi:battery-charging-high
+                secondary_info: last-changed
+              - entity: sensor.napelsstraat_chargers
+                icon: mdi:battery-charging-high
+                secondary_info: last-changed
+              - entity: sensor.madrasstraat_chargers
+                secondary_info: last-changed
+                icon: mdi:battery-charging-high
+            state_color: true
+    background:
+      opacity: 100
+      alignment: center
+      size: cover
+      repeat: repeat
+      attachment: fixed
+      image: /api/image/serve/25c41724eace4caee7d78159e5e9b5d6/original
+    cards: []
+  - type: panel
+    path: location-history
+    title: Location History
+    icon: mdi:map-marker-radius
+    cards:
+      - type: map
+        entities:
+          - entity: device_tracker.2cjn170_caitlyn_device_tracker
+        theme_mode: auto
+        hours_to_show: 168
+        default_zoom: 12
+title: Caitlyn - Mercedes CLA 250e Shooting Brake
