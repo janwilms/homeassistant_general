@@ -1,0 +1,31 @@
+alias: Bed light door side dim up
+description: Cycle dim up while holding Rodret dim-up button; stops on release (IKEA Rodret sends stop_with_on_off).
+triggers:
+  - device_id: 357431fe613a477dcbfb13c67fca6b5c
+    domain: zha
+    type: remote_button_long_press
+    subtype: dim_up
+    trigger: device
+conditions:
+  - condition: state
+    entity_id:
+      - input_boolean.bed_light_dim_up_holding
+    state: "off"
+actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.bed_light_dim_up_holding
+  - repeat:
+      while:
+        - condition: state
+          entity_id: input_boolean.bed_light_dim_up_holding
+          state: "on"
+      sequence:
+        - action: light.turn_on
+          target:
+            entity_id: light.hue_color_luster_1
+          data:
+            brightness_step_pct: +10
+        - delay:
+            milliseconds: 400
+mode: single

@@ -1,0 +1,3 @@
+# True while user is holding Rodret dim-up button (stops repeat loop on release)
+name: Bed light dim up holding
+icon: mdi:brightness-7

@@ -1,0 +1,30 @@
+alias: Christmas Tree Auto-Off at 23:00
+description: >-
+  Turn off Christmas tree power plug at 23:00 if there are no lights on in
+  living room or computer room (keeps it on when user is home with lights on).
+triggers:
+  - platform: time_pattern
+    hours: 23
+    minutes: 0
+    seconds: 0
+conditions:
+  - condition: and
+    conditions:
+      # Check if living room lights are off
+      - condition: template
+        value_template: >
+          {% set lr_state = states('light.living_room') %}
+          {% set lr_brightness = state_attr('light.living_room', 'brightness') | int(0) %}
+          {{ lr_state == 'off' or lr_brightness == 0 }}
+      # Check if computer room lights are off
+      - condition: template
+        value_template: >
+          {% set cr_state = states('light.computer_room') %}
+          {% set cr_brightness = state_attr('light.computer_room', 'brightness') | int(0) %}
+          {{ cr_state == 'off' or cr_brightness == 0 }}
+actions:
+  - action: switch.turn_off
+    target:
+      entity_id: switch.powerplug_01_switch
+mode: single
+

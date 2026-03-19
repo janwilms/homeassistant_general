@@ -1,0 +1,18 @@
+alias: Christmas Tree Off When Living Room Lights Off
+description: >-
+  Turn off Christmas tree power plug when living room lights turn off between
+  22:00 and 05:00.
+triggers:
+  - platform: state
+    entity_id: light.living_room
+    to: "off"
+conditions:
+  - condition: time
+    after: "22:00:00"
+    before: "05:00:00"
+actions:
+  - action: switch.turn_off
+    target:
+      entity_id: switch.powerplug_01_switch
+mode: single
+

@@ -57,7 +57,7 @@ actions:
     data:
       media_player_entity_id: media_player.all_but_bed_speakers
       message: >
-        Commander, outside temperature is {{ outside_temp }} degrees, it is now
+        oyá kopeng, outside temperature is {{ outside_temp }} degrees, it is now
         exceeding the inside average of {{ inside_avg_temp }} degrees. Please
         take measures to keep out the heat.
     action: tts.speak

@@ -1,0 +1,16 @@
+alias: Bed light door side dim up stop
+description: Stops dim-up loop when Rodret button is released (zha_event stop_with_on_off).
+triggers:
+  - trigger: event
+    event_type: zha_event
+    event_data:
+      device_id: 357431fe613a477dcbfb13c67fca6b5c
+      command: stop_with_on_off
+      cluster_id: 8
+      endpoint_id: 1
+conditions: []
+actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.bed_light_dim_up_holding
+mode: single
