@@ -1,0 +1,426 @@
+views:
+  - type: sections
+    title: Camina
+    path: car
+    max_columns: 4
+    background:
+      image: /local/car_front.png
+      size: 62%
+      alignment: center
+      attachment: fixed
+      opacity: 20
+    sections:
+      - type: grid
+        column_span: 1
+        cards:
+          - type: heading
+            heading: Battery
+            heading_style: title
+            icon: mdi:battery-charging-80
+          - type: gauge
+            entity: sensor.car_ev_battery
+            name: EV Battery
+            needle: true
+            min: 0
+            max: 100
+            severity:
+              green: 50
+              yellow: 20
+              red: 0
+          - type: entities
+            entities:
+              - entity: sensor.car_ev_range
+                name: EV Range
+                icon: mdi:road-variant
+              - entity: sensor.car_odometer
+                name: Odometer
+                icon: mdi:speedometer
+              - entity: sensor.car_12v_battery
+                name: 12V Battery
+                icon: mdi:car-battery
+              - entity: sensor.car_battery_soh
+                name: Battery SOH
+                icon: mdi:battery-heart
+              - entity: sensor.car_location_name
+                name: Location
+                icon: mdi:map-marker
+              - entity: sensor.car_last_updated
+                name: Last Updated
+                icon: mdi:update
+      - type: grid
+        column_span: 1
+        cards:
+          - type: heading
+            heading: Charging
+            heading_style: title
+            icon: mdi:ev-station
+          - type: gauge
+            entity: sensor.car_charging_power
+            name: Charging Power
+            needle: true
+            min: 0
+            max: 150
+            severity:
+              green: 0
+              yellow: 22
+              red: 100
+          - type: entities
+            entities:
+              - entity: binary_sensor.car_charging
+                name: Charging
+                icon: mdi:ev-station
+              - entity: binary_sensor.car_plugged_in
+                name: Plugged In
+                icon: mdi:power-plug
+              - entity: binary_sensor.car_charge_port
+                name: Charge Port
+                icon: mdi:ev-plug-type2
+              - entity: sensor.car_charge_eta
+                name: AC Charge ETA
+                icon: mdi:ev-station
+              - entity: sensor.car_fast_charge_eta
+                name: DC Fast ETA
+                icon: mdi:lightning-bolt
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: Charging Power — 8 hours
+            heading_style: title
+            icon: mdi:chart-line
+          - type: custom:mini-graph-card
+            entity: sensor.car_charging_power
+            name: kW
+            hours_to_show: 8
+            points_per_hour: 4
+            line_width: 2
+            height: 140
+            animate: true
+            show:
+              legend: false
+              fill: true
+            color_thresholds:
+              - value: 0
+                color: '#3b82f6'
+              - value: 22
+                color: '#06b6d4'
+              - value: 80
+                color: '#22c55e'
+              - value: 130
+                color: '#f97316'
+      - type: grid
+        column_span: 1
+        cards:
+          - type: heading
+            heading: Doors & Security
+            heading_style: title
+            icon: mdi:car-door
+          - type: entities
+            entities:
+              - entity: binary_sensor.car_locked
+                name: Locked
+                icon: mdi:lock
+              - type: divider
+              - entity: binary_sensor.car_front_left_door
+                name: Front Left Door
+              - entity: binary_sensor.car_front_right_door
+                name: Front Right Door
+              - entity: binary_sensor.car_rear_left_door
+                name: Rear Left Door
+              - entity: binary_sensor.car_rear_right_door
+                name: Rear Right Door
+              - type: divider
+              - entity: binary_sensor.car_hood
+                name: Hood
+              - entity: binary_sensor.car_trunk
+                name: Trunk
+              - entity: binary_sensor.car_sunroof
+                name: Sunroof
+      - type: grid
+        column_span: 1
+        cards:
+          - type: heading
+            heading: Windows & Tyres
+            heading_style: title
+            icon: mdi:car-door-lock
+          - type: entities
+            entities:
+              - entity: binary_sensor.car_front_left_window
+                name: Front Left Window
+              - entity: binary_sensor.car_front_right_window
+                name: Front Right Window
+              - entity: binary_sensor.car_rear_left_window
+                name: Rear Left Window
+              - entity: binary_sensor.car_rear_right_window
+                name: Rear Right Window
+              - type: divider
+              - entity: binary_sensor.car_tpms_warning
+                name: TPMS — Any Warning
+                icon: mdi:tire
+              - entity: binary_sensor.car_tpms_fl
+                name: TPMS Front Left
+                icon: mdi:tire
+              - entity: binary_sensor.car_tpms_fr
+                name: TPMS Front Right
+                icon: mdi:tire
+              - entity: binary_sensor.car_tpms_rl
+                name: TPMS Rear Left
+                icon: mdi:tire
+              - entity: binary_sensor.car_tpms_rr
+                name: TPMS Rear Right
+                icon: mdi:tire
+      - type: grid
+        column_span: 1
+        cards:
+          - type: heading
+            heading: Climate
+            heading_style: title
+            icon: mdi:air-conditioner
+          - type: entities
+            entities:
+              - entity: binary_sensor.car_climate_active
+                name: Climate Active
+                icon: mdi:air-conditioner
+              - entity: sensor.car_climate_target_temp
+                name: Target Temp
+                icon: mdi:thermometer
+              - type: divider
+              - entity: binary_sensor.car_defrost
+                name: Defrost
+                icon: mdi:car-defrost-front
+              - entity: binary_sensor.car_rear_window_heater
+                name: Rear Window Heater
+                icon: mdi:car-defrost-rear
+              - entity: binary_sensor.car_steering_wheel_heater
+                name: Steering Wheel Heater
+                icon: mdi:steering
+              - entity: binary_sensor.car_side_mirror_heater
+                name: Side Mirror Heater
+                icon: mdi:car-side
+              - type: divider
+              - entity: binary_sensor.car_seat_heater_fl
+                name: Seat Heater — Front Left
+                icon: mdi:car-seat-heater
+              - entity: binary_sensor.car_seat_heater_fr
+                name: Seat Heater — Front Right
+                icon: mdi:car-seat-heater
+              - entity: binary_sensor.car_seat_heater_rl
+                name: Seat Heater — Rear Left
+                icon: mdi:car-seat-heater
+              - entity: binary_sensor.car_seat_heater_rr
+                name: Seat Heater — Rear Right
+                icon: mdi:car-seat-heater
+      - type: grid
+        column_span: 1
+        cards:
+          - type: heading
+            heading: Warnings
+            heading_style: title
+            icon: mdi:alert-circle
+          - type: entities
+            entities:
+              - entity: binary_sensor.car_smart_key_warning
+                name: Smart Key Battery
+                icon: mdi:key-alert
+              - entity: binary_sensor.car_washer_fluid_warning
+                name: Washer Fluid
+                icon: mdi:wiper-wash
+              - entity: binary_sensor.car_brake_fluid_warning
+                name: Brake Fluid
+                icon: mdi:alert-circle
+      - type: grid
+        column_span: 4
+        cards:
+          - type: heading
+            heading: Actions
+            heading_style: title
+            icon: mdi:gesture-tap
+          - type: horizontal-stack
+            cards:
+              - type: button
+                entity: script.car_lock
+                name: Lock
+                icon: mdi:lock
+                tap_action:
+                  action: call-service
+                  service: script.car_lock
+              - type: button
+                entity: script.car_unlock
+                name: Unlock
+                icon: mdi:lock-open
+                tap_action:
+                  action: call-service
+                  service: script.car_unlock
+              - type: button
+                entity: script.car_start_climate
+                name: Start Climate
+                icon: mdi:air-conditioner
+                tap_action:
+                  action: more-info
+              - type: button
+                entity: script.car_stop_climate
+                name: Stop Climate
+                icon: mdi:air-conditioner-off
+                tap_action:
+                  action: call-service
+                  service: script.car_stop_climate
+              - type: button
+                entity: script.car_start_charging
+                name: Start Charging
+                icon: mdi:ev-station
+                tap_action:
+                  action: call-service
+                  service: script.car_start_charging
+              - type: button
+                entity: script.car_stop_charging
+                name: Stop Charging
+                icon: mdi:battery-minus
+                tap_action:
+                  action: call-service
+                  service: script.car_stop_charging
+          - type: horizontal-stack
+            cards:
+              - type: button
+                entity: script.car_open_charge_port
+                name: Open Port
+                icon: mdi:ev-plug-type2
+                tap_action:
+                  action: call-service
+                  service: script.car_open_charge_port
+              - type: button
+                entity: script.car_close_charge_port
+                name: Close Port
+                icon: mdi:ev-plug-type2
+                tap_action:
+                  action: call-service
+                  service: script.car_close_charge_port
+              - type: button
+                entity: script.car_open_windows
+                name: Open Windows
+                icon: mdi:car-door
+                tap_action:
+                  action: call-service
+                  service: script.car_open_windows
+              - type: button
+                entity: script.car_close_windows
+                name: Close Windows
+                icon: mdi:car-door
+                tap_action:
+                  action: call-service
+                  service: script.car_close_windows
+              - type: button
+                entity: script.car_hazard_lights
+                name: Hazard Lights
+                icon: mdi:hazard-lights
+                tap_action:
+                  action: call-service
+                  service: script.car_hazard_lights
+              - type: button
+                entity: script.car_horn_and_lights
+                name: Horn + Lights
+                icon: mdi:bullhorn
+                tap_action:
+                  action: call-service
+                  service: script.car_horn_and_lights
+          - type: horizontal-stack
+            cards:
+              - type: button
+                entity: script.car_set_charge_limits
+                name: Charge Limits
+                icon: mdi:battery-charging-100
+                tap_action:
+                  action: more-info
+              - type: button
+                entity: script.car_set_charging_current
+                name: Charging Current
+                icon: mdi:current-ac
+                tap_action:
+                  action: more-info
+              - type: button
+                entity: script.car_force_update
+                name: Force Update
+                icon: mdi:refresh
+                tap_action:
+                  action: call-service
+                  service: script.car_force_update
+  - type: sections
+    title: Location
+    path: car-location
+    max_columns: 4
+    sections:
+      - type: grid
+        column_span: 4
+        cards:
+          - type: heading
+            heading: Location
+            heading_style: title
+            icon: mdi:map-marker
+          - type: map
+            entities:
+              - entity: device_tracker.camina
+                label: Camina
+            hours_to_show: 24
+            aspect_ratio: '16:6'
+          - type: entities
+            entities:
+              - entity: sensor.car_location_name
+                name: Current Location
+                icon: mdi:map-marker
+              - entity: sensor.car_last_updated
+                name: Last Updated
+                icon: mdi:update
+              - entity: sensor.car_odometer
+                name: Odometer
+                icon: mdi:speedometer
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: Battery — 24 hours
+            heading_style: title
+            icon: mdi:battery-charging-80
+          - type: custom:mini-graph-card
+            entity: sensor.car_ev_battery
+            name: EV Battery %
+            hours_to_show: 24
+            points_per_hour: 1
+            line_width: 2
+            height: 120
+            animate: true
+            show:
+              fill: true
+            color_thresholds:
+              - value: 0
+                color: '#ef4444'
+              - value: 20
+                color: '#f97316'
+              - value: 50
+                color: '#eab308'
+              - value: 80
+                color: '#22c55e'
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: EV Range — 24 hours
+            heading_style: title
+            icon: mdi:road-variant
+          - type: custom:mini-graph-card
+            entity: sensor.car_ev_range
+            name: EV Range km
+            hours_to_show: 24
+            points_per_hour: 1
+            line_width: 2
+            height: 120
+            animate: true
+            show:
+              fill: true
+            color_thresholds:
+              - value: 0
+                color: '#ef4444'
+              - value: 80
+                color: '#f97316'
+              - value: 150
+                color: '#eab308'
+              - value: 250
+                color: '#22c55e'

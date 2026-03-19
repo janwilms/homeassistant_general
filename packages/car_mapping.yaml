@@ -1,0 +1,258 @@
+# ==============================================================================
+# CAR PACKAGE — MAPPING
+# ==============================================================================
+# THIS IS THE ONLY FILE YOU TOUCH IN JULY
+#
+# Each sensor here maps a generic car_*_source entity to its data source.
+# Now:  points to mock helpers (input_number / input_boolean)
+# July: replace the entity ID on the right with the real Kia entity ID
+#
+# Example swap:
+#   now:  state: "{{ states('input_number.mock_car_ev_battery') }}"
+#   july: state: "{{ states('sensor.camina_ev_battery_level') }}"
+#
+# Find real Kia entity IDs in:
+#   HA Settings → Devices → your Kia device → entities list
+# ==============================================================================
+
+template:
+  # ----------------------------------------------------------------------------
+  # NUMERIC SOURCES
+  # ----------------------------------------------------------------------------
+
+  - sensor:
+      - name: "Car EV Battery Source"
+        unique_id: car_ev_battery_source
+        unit_of_measurement: "%"
+        state: "{{ states('input_number.mock_car_ev_battery') }}"
+        # july: "{{ states('sensor.camina_ev_battery_level') }}"
+
+      - name: "Car 12V Battery Source"
+        unique_id: car_12v_battery_source
+        unit_of_measurement: "%"
+        state: "{{ states('input_number.mock_car_12v_battery') }}"
+        # july: "{{ states('sensor.camina_car_battery_level') }}"
+
+      - name: "Car EV Range Source"
+        unique_id: car_ev_range_source
+        unit_of_measurement: km
+        state: "{{ states('input_number.mock_car_ev_range') }}"
+        # july: "{{ states('sensor.camina_ev_range') }}"
+
+      - name: "Car Total Range Source"
+        unique_id: car_total_range_source
+        unit_of_measurement: km
+        state: "{{ states('input_number.mock_car_total_range') }}"
+        # july: "{{ states('sensor.camina_total_driving_range') }}"
+
+      - name: "Car Odometer Source"
+        unique_id: car_odometer_source
+        unit_of_measurement: km
+        state: "{{ states('input_number.mock_car_odometer') }}"
+        # july: "{{ states('sensor.camina_odometer') }}"
+
+      - name: "Car Charge ETA Source"
+        unique_id: car_charge_eta_source
+        unit_of_measurement: min
+        state: "{{ states('input_number.mock_car_charge_eta') }}"
+        # july: "{{ states('sensor.camina_estimated_charge_duration') }}"
+
+      - name: "Car Charging Power Source"
+        unique_id: car_charging_power_source
+        unit_of_measurement: kW
+        state: "{{ states('input_number.mock_car_charging_power') }}"
+        # july: "{{ states('sensor.camina_ev_charging_power') }}"
+
+      - name: "Car Climate Target Temp Source"
+        unique_id: car_climate_target_temp_source
+        unit_of_measurement: "°C"
+        state: "{{ states('input_number.mock_car_climate_target_temp') }}"
+        # july: "{{ states('sensor.camina_set_temperature') }}"
+
+      - name: "Car Location Name Source"
+        unique_id: car_location_name_source
+        state: "Home (mock)"
+        # july: "{{ states('sensor.camina_geocoded_location') }}"
+
+      - name: "Car Last Updated Source"
+        unique_id: car_last_updated_source
+        state: "{{ now().isoformat() }}"
+        # july: "{{ states('sensor.camina_last_updated_at') }}"
+
+      - name: "Car Fast Charge ETA Source"
+        unique_id: car_fast_charge_eta_source
+        unit_of_measurement: min
+        state: "{{ states('input_number.mock_car_fast_charge_eta') }}"
+        # july: "{{ states('sensor.camina_estimated_fast_charge_duration') }}"
+
+      - name: "Car Battery SOH Source"
+        unique_id: car_battery_soh_source
+        unit_of_measurement: "%"
+        state: "{{ states('input_number.mock_car_battery_soh') }}"
+        # july: "{{ states('sensor.camina_ev_state_of_health') }}"
+
+  # ----------------------------------------------------------------------------
+  # BOOLEAN SOURCES
+  # ----------------------------------------------------------------------------
+
+  - binary_sensor:
+      - name: "Car Charging Source"
+        unique_id: car_charging_source
+        state: "{{ is_state('input_boolean.mock_car_charging', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_ev_battery_charge', 'on') }}"
+
+      - name: "Car Plugged In Source"
+        unique_id: car_plugged_in_source
+        state: "{{ is_state('input_boolean.mock_car_plugged_in', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_ev_battery_plugged_in', 'on') }}"
+
+      - name: "Car Locked Source"
+        unique_id: car_locked_source
+        state: "{{ is_state('input_boolean.mock_car_locked', 'on') }}"
+        # july: "{{ is_state('lock.camina_door_lock', 'locked') }}"
+
+      - name: "Car Door FL Source"
+        unique_id: car_door_fl_source
+        state: "{{ is_state('input_boolean.mock_car_door_fl', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_front_left_door', 'on') }}"
+
+      - name: "Car Door FR Source"
+        unique_id: car_door_fr_source
+        state: "{{ is_state('input_boolean.mock_car_door_fr', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_front_right_door', 'on') }}"
+
+      - name: "Car Door RL Source"
+        unique_id: car_door_rl_source
+        state: "{{ is_state('input_boolean.mock_car_door_rl', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_back_left_door', 'on') }}"
+
+      - name: "Car Door RR Source"
+        unique_id: car_door_rr_source
+        state: "{{ is_state('input_boolean.mock_car_door_rr', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_back_right_door', 'on') }}"
+
+      - name: "Car Trunk Source"
+        unique_id: car_trunk_source
+        state: "{{ is_state('input_boolean.mock_car_trunk', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_trunk', 'on') }}"
+
+      - name: "Car Hood Source"
+        unique_id: car_hood_source
+        state: "{{ is_state('input_boolean.mock_car_hood', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_hood', 'on') }}"
+
+      - name: "Car Window FL Source"
+        unique_id: car_window_fl_source
+        state: "{{ is_state('input_boolean.mock_car_window_fl', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_front_left_window', 'on') }}"
+        # note: window state sensors unconfirmed for EV5 EU — verify on delivery
+
+      - name: "Car Window FR Source"
+        unique_id: car_window_fr_source
+        state: "{{ is_state('input_boolean.mock_car_window_fr', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_front_right_window', 'on') }}"
+
+      - name: "Car Window RL Source"
+        unique_id: car_window_rl_source
+        state: "{{ is_state('input_boolean.mock_car_window_rl', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_rear_left_window', 'on') }}"
+
+      - name: "Car Window RR Source"
+        unique_id: car_window_rr_source
+        state: "{{ is_state('input_boolean.mock_car_window_rr', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_rear_right_window', 'on') }}"
+
+      - name: "Car Climate Active Source"
+        unique_id: car_climate_active_source
+        state: "{{ is_state('input_boolean.mock_car_climate_active', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_air_conditioner', 'on') }}"
+
+      - name: "Car Defrost Source"
+        unique_id: car_defrost_source
+        state: "{{ is_state('input_boolean.mock_car_defrost', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_defroster', 'on') }}"
+
+      - name: "Car Steering Wheel Heater Source"
+        unique_id: car_steering_wheel_heater_source
+        state: "{{ is_state('input_boolean.mock_car_steering_heat', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_heated_steering_wheel', 'on') }}"
+
+      - name: "Car Rear Window Heater Source"
+        unique_id: car_rear_window_heater_source
+        state: "{{ is_state('input_boolean.mock_car_rear_window_heat', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_heated_rear_window', 'on') }}"
+
+      - name: "Car TPMS All Source"
+        unique_id: car_tpms_all_source
+        state: "{{ is_state('input_boolean.mock_car_tpms_all', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_tire_pressure_all', 'on') }}"
+
+      - name: "Car TPMS FL Source"
+        unique_id: car_tpms_fl_source
+        state: "{{ is_state('input_boolean.mock_car_tpms_fl', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_tire_pressure_front_left', 'on') }}"
+
+      - name: "Car TPMS FR Source"
+        unique_id: car_tpms_fr_source
+        state: "{{ is_state('input_boolean.mock_car_tpms_fr', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_tire_pressure_front_right', 'on') }}"
+
+      - name: "Car TPMS RL Source"
+        unique_id: car_tpms_rl_source
+        state: "{{ is_state('input_boolean.mock_car_tpms_rl', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_tire_pressure_rear_left', 'on') }}"
+
+      - name: "Car TPMS RR Source"
+        unique_id: car_tpms_rr_source
+        state: "{{ is_state('input_boolean.mock_car_tpms_rr', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_tire_pressure_rear_right', 'on') }}"
+
+      - name: "Car Sunroof Source"
+        unique_id: car_sunroof_source
+        state: "{{ is_state('input_boolean.mock_car_sunroof', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_sunroof', 'on') }}"
+
+      - name: "Car Side Mirror Heater Source"
+        unique_id: car_side_mirror_heater_source
+        state: "{{ is_state('input_boolean.mock_car_side_mirror_heater', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_side_mirror_heater', 'on') }}"
+
+      - name: "Car Seat Heater FL Source"
+        unique_id: car_seat_heat_fl_source
+        state: "{{ is_state('input_boolean.mock_car_seat_heat_fl', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_front_left_seat_heater', 'on') }}"
+
+      - name: "Car Seat Heater FR Source"
+        unique_id: car_seat_heat_fr_source
+        state: "{{ is_state('input_boolean.mock_car_seat_heat_fr', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_front_right_seat_heater', 'on') }}"
+
+      - name: "Car Seat Heater RL Source"
+        unique_id: car_seat_heat_rl_source
+        state: "{{ is_state('input_boolean.mock_car_seat_heat_rl', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_rear_left_seat_heater', 'on') }}"
+
+      - name: "Car Seat Heater RR Source"
+        unique_id: car_seat_heat_rr_source
+        state: "{{ is_state('input_boolean.mock_car_seat_heat_rr', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_rear_right_seat_heater', 'on') }}"
+
+      - name: "Car Smart Key Warning Source"
+        unique_id: car_smart_key_warning_source
+        state: "{{ is_state('input_boolean.mock_car_smart_key_warning', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_smart_key_battery', 'on') }}"
+
+      - name: "Car Washer Fluid Warning Source"
+        unique_id: car_washer_fluid_warning_source
+        state: "{{ is_state('input_boolean.mock_car_washer_fluid_warning', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_washer_fluid_warning', 'on') }}"
+
+      - name: "Car Brake Fluid Warning Source"
+        unique_id: car_brake_fluid_warning_source
+        state: "{{ is_state('input_boolean.mock_car_brake_fluid_warning', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_brake_fluid_warning', 'on') }}"
+
+      - name: "Car Charge Port Source"
+        unique_id: car_charge_port_source
+        state: "{{ is_state('input_boolean.mock_car_charge_port', 'on') }}"
+        # july: "{{ is_state('binary_sensor.camina_ev_charge_port', 'on') }}"

@@ -1,0 +1,235 @@
+# ==============================================================================
+# CAR PACKAGE — INPUTS
+# Mock helpers only — these simulate car data while no real car is connected
+# Do not reference these directly in dashboards or automations
+# Use the facade sensors in car_sensors.yaml and car_binary_sensors.yaml
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# NUMERIC MOCK DATA
+# ------------------------------------------------------------------------------
+
+input_number:
+  mock_car_ev_battery:
+    name: Mock EV Battery
+    min: 0
+    max: 100
+    step: 1
+    initial: 80
+    unit_of_measurement: "%"
+    icon: mdi:battery-80
+
+  mock_car_12v_battery:
+    name: Mock 12V Battery
+    min: 0
+    max: 100
+    step: 1
+    initial: 95
+    unit_of_measurement: "%"
+    icon: mdi:car-battery
+
+  mock_car_ev_range:
+    name: Mock EV Range
+    min: 0
+    max: 600
+    step: 1
+    initial: 320
+    unit_of_measurement: km
+    icon: mdi:road-variant
+
+  mock_car_total_range:
+    name: Mock Total Range
+    min: 0
+    max: 600
+    step: 1
+    initial: 320
+    unit_of_measurement: km
+    icon: mdi:road-variant
+
+  mock_car_odometer:
+    name: Mock Odometer
+    min: 0
+    max: 999999
+    step: 1
+    initial: 1000
+    unit_of_measurement: km
+    icon: mdi:speedometer
+
+  mock_car_charge_eta:
+    name: Mock Charge ETA
+    min: 0
+    max: 600
+    step: 1
+    initial: 45
+    unit_of_measurement: min
+    icon: mdi:ev-station
+
+  mock_car_charging_power:
+    name: Mock Charging Power
+    min: 0
+    max: 150
+    step: 0.1
+    initial: 11.0
+    unit_of_measurement: kW
+    icon: mdi:flash
+
+  mock_car_climate_target_temp:
+    name: Mock Climate Target Temp
+    min: 14
+    max: 30
+    step: 0.5
+    initial: 21
+    unit_of_measurement: "°C"
+    icon: mdi:thermometer
+
+  mock_car_fast_charge_eta:
+    name: Mock Fast Charge ETA
+    min: 0
+    max: 120
+    step: 1
+    initial: 0
+    unit_of_measurement: min
+    icon: mdi:lightning-bolt
+
+  mock_car_battery_soh:
+    name: Mock Battery State of Health
+    min: 0
+    max: 100
+    step: 1
+    initial: 100
+    unit_of_measurement: "%"
+    icon: mdi:battery-heart
+
+# ------------------------------------------------------------------------------
+# BOOLEAN MOCK DATA
+# ------------------------------------------------------------------------------
+
+input_boolean:
+  mock_car_charging:
+    name: Mock Charging
+    icon: mdi:ev-station
+
+  mock_car_plugged_in:
+    name: Mock Plugged In
+    icon: mdi:power-plug
+
+  mock_car_locked:
+    name: Mock Locked
+    initial: true
+    icon: mdi:lock
+
+  mock_car_door_fl:
+    name: Mock Front Left Door
+    icon: mdi:car-door
+
+  mock_car_door_fr:
+    name: Mock Front Right Door
+    icon: mdi:car-door
+
+  mock_car_door_rl:
+    name: Mock Rear Left Door
+    icon: mdi:car-door
+
+  mock_car_door_rr:
+    name: Mock Rear Right Door
+    icon: mdi:car-door
+
+  mock_car_trunk:
+    name: Mock Trunk
+    icon: mdi:car-back
+
+  mock_car_hood:
+    name: Mock Hood
+    icon: mdi:car
+
+  mock_car_window_fl:
+    name: Mock Front Left Window
+    icon: mdi:car-door
+
+  mock_car_window_fr:
+    name: Mock Front Right Window
+    icon: mdi:car-door
+
+  mock_car_window_rl:
+    name: Mock Rear Left Window
+    icon: mdi:car-door
+
+  mock_car_window_rr:
+    name: Mock Rear Right Window
+    icon: mdi:car-door
+
+  mock_car_climate_active:
+    name: Mock Climate Active
+    icon: mdi:air-conditioner
+
+  mock_car_defrost:
+    name: Mock Defrost
+    icon: mdi:car-defrost-front
+
+  mock_car_steering_heat:
+    name: Mock Steering Wheel Heater
+    icon: mdi:steering
+
+  mock_car_rear_window_heat:
+    name: Mock Rear Window Heater
+    icon: mdi:car-defrost-rear
+
+  mock_car_tpms_all:
+    name: Mock TPMS Warning
+    icon: mdi:tire
+
+  mock_car_tpms_fl:
+    name: Mock TPMS FL
+    icon: mdi:tire
+
+  mock_car_tpms_fr:
+    name: Mock TPMS FR
+    icon: mdi:tire
+
+  mock_car_tpms_rl:
+    name: Mock TPMS RL
+    icon: mdi:tire
+
+  mock_car_tpms_rr:
+    name: Mock TPMS RR
+    icon: mdi:tire
+
+  mock_car_sunroof:
+    name: Mock Sunroof
+    icon: mdi:car-convertible
+
+  mock_car_side_mirror_heater:
+    name: Mock Side Mirror Heater
+    icon: mdi:car-side
+
+  mock_car_seat_heat_fl:
+    name: Mock Seat Heater Front Left
+    icon: mdi:car-seat-heater
+
+  mock_car_seat_heat_fr:
+    name: Mock Seat Heater Front Right
+    icon: mdi:car-seat-heater
+
+  mock_car_seat_heat_rl:
+    name: Mock Seat Heater Rear Left
+    icon: mdi:car-seat-heater
+
+  mock_car_seat_heat_rr:
+    name: Mock Seat Heater Rear Right
+    icon: mdi:car-seat-heater
+
+  mock_car_smart_key_warning:
+    name: Mock Smart Key Battery Warning
+    icon: mdi:key-alert
+
+  mock_car_washer_fluid_warning:
+    name: Mock Washer Fluid Warning
+    icon: mdi:wiper-wash
+
+  mock_car_brake_fluid_warning:
+    name: Mock Brake Fluid Warning
+    icon: mdi:alert-circle
+
+  mock_car_charge_port:
+    name: Mock Charge Port
+    icon: mdi:ev-plug-type2

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<!--
+  Camina — Kia EV5 Dashboard Mockup v5
+  ─────────────────────────────────────
+  Full sensor coverage of the facade layer.
+
+  New in v5:
+  - Battery SOH stat added to Battery card
+  - Charge port state + DC fast-charge ETA in Charging card
+  - Sunroof added to Doors card
+  - Seat heaters (FL/FR/RL/RR) + side mirror heater in Climate card
+  - Warnings card: smart key, washer fluid, brake fluid
+  - Actions: open/close charge port, set charge limits, set charging current
+
+  All facade entities used:
+    sensor.car_ev_battery          sensor.car_battery_soh
+    sensor.car_12v_battery         sensor.car_ev_range
+    sensor.car_odometer            sensor.car_charge_eta
+    sensor.car_fast_charge_eta     sensor.car_charging_power
+    sensor.car_climate_target_temp sensor.car_location_name
+    sensor.car_last_updated
+    binary_sensor.car_charging     binary_sensor.car_plugged_in
+    binary_sensor.car_charge_port
+    binary_sensor.car_locked
+    binary_sensor.car_door_fl/fr/rl/rr
+    binary_sensor.car_trunk        binary_sensor.car_hood
+    binary_sensor.car_sunroof
+    binary_sensor.car_window_fl/fr/rl/rr
+    binary_sensor.car_climate_active
+    binary_sensor.car_defrost      binary_sensor.car_rear_window_heater
+    binary_sensor.car_steering_wheel_heater
+    binary_sensor.car_side_mirror_heater
+    binary_sensor.car_seat_heat_fl/fr/rl/rr
+    binary_sensor.car_tpms_all     binary_sensor.car_tpms_fl/fr/rl/rr
+    binary_sensor.car_smart_key_warning
+    binary_sensor.car_washer_fluid_warning
+    binary_sensor.car_brake_fluid_warning
+    All scripts
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camina — Dashboard Mockup</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:  #22c55e;
+      --blue:   #3b82f6;
+      --cyan:   #06b6d4;
+      --yellow: #eab308;
+      --orange: #f97316;
+      --red:    #ef4444;
+      --muted:  #94a3b8;
+      --dim:    #475569;
+      --border: rgba(255,255,255,0.08);
+      --card:   rgba(15,23,42,0.78);
+      --chip:   rgba(15,23,42,0.55);
+      --text:   #f1f5f9;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 14px;
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background-color: #080e1c;
+      background-image: url('../images/car_front.png');
+      background-size: 62%;
+      background-position: center 55%;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: rgba(4,10,24,0.76);
+      pointer-events: none; z-index: 0;
+    }
+    .dash { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; }
+
+    /* ── CARD ─────────────────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .ct {  /* card title */
+      padding: 7px 12px;
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .ct i { font-size: 13px; }
+    .p { padding: 12px; }
+
+    /* ── HEADER ───────────────────────────────────────────────────── */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px; margin-bottom: 12px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; backdrop-filter: blur(14px);
+    }
+    .car-name { font-size: 18px; font-weight: 700; }
+    .car-sub  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .hstats   { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    .hs       { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
+    .hs strong { color: var(--text); }
+    .hs i { font-size: 15px; }
+
+    /* ── LAYOUT ───────────────────────────────────────────────────── */
+    .row  { display: grid; gap: 12px; margin-bottom: 12px; }
+    .c3   { grid-template-columns: repeat(3, 1fr); }
+    .c4   { grid-template-columns: repeat(4, 1fr); }
+
+    /* ── GAUGE ────────────────────────────────────────────────────── */
+    /* Arc M 20 100 A 80 80 0 0 1 180 100  ≈ 251.3 units              */
+    /* battery  80%      → 201 / 51                                   */
+    /* charging 11/150kW → 18  / 233                                  */
+    .gauge { display: flex; flex-direction: column; align-items: center; }
+    .gauge svg { width: 100%; max-width: 190px; height: auto; }
+
+    /* ── STAT TILES ───────────────────────────────────────────────── */
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; }
+    .stat {
+      background: var(--chip); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 10px; text-align: center;
+    }
+    .sv { font-size: 17px; font-weight: 700; line-height: 1.2; }
+    .sl { font-size: 8.5px; color: var(--muted); margin-top: 2px;
+          text-transform: uppercase; letter-spacing: 0.07em; }
+
+    /* ── STATUS CHIP ──────────────────────────────────────────────── */
+    .chip {
+      background: var(--chip); border: 1px solid var(--border);
+      border-radius: 8px; padding: 7px 8px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .chip i   { font-size: 17px; flex-shrink: 0; }
+    .cl { font-size: 8.5px; color: var(--muted); line-height: 1.2; }
+    .cv { font-size: 11px; font-weight: 600; line-height: 1.2; }
+    .chip.wide { justify-content: center; gap: 12px; padding: 10px; }
+
+    /* ── 2-COL CHIP GRID ──────────────────────────────────────────── */
+    .cg  { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .cg .sec {
+      grid-column: span 2;
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--dim); padding: 4px 0 2px;
+    }
+    .cg .s2 { grid-column: span 2; }
+
+    /* ── GLANCE GRID ──────────────────────────────────────────────── */
+    .glance { display: grid; gap: 6px; }
+    .gc3 { grid-template-columns: repeat(3, 1fr); }
+    .gc4 { grid-template-columns: repeat(4, 1fr); }
+    .gi {
+      background: var(--chip); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 6px;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      font-size: 9px; color: var(--muted); text-align: center;
+    }
+    .gi i { font-size: 20px; }
+    .gi strong { font-size: 10px; }
+
+    /* ── CHART ────────────────────────────────────────────────────── */
+    .chart-svg { width: 100%; height: auto; display: block; }
+    .cxl {
+      display: flex; justify-content: space-between;
+      font-size: 9px; color: var(--dim); margin-top: 3px;
+    }
+
+    /* ── ACTIONS ──────────────────────────────────────────────────── */
+    .actions { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    .act {
+      background: var(--chip); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); padding: 10px 6px;
+      cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      font-size: 10px; font-family: inherit;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .act:hover      { background: rgba(59,130,246,0.2); border-color: var(--blue); }
+    .act.warn:hover { background: rgba(249,115,22,0.2); border-color: var(--orange); }
+    .act.params { border-style: dashed; }
+    .act.params:hover { background: rgba(6,182,212,0.15); border-color: var(--cyan); }
+    .act i { font-size: 22px; }
+
+    /* ── WARNING CHIP ─────────────────────────────────────────────── */
+    .warn-chip {
+      background: var(--chip); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 10px;
+      display: flex; align-items: center; gap: 8px; font-size: 11px;
+    }
+    .warn-chip i { font-size: 18px; flex-shrink: 0; }
+    .warn-stack { display: flex; flex-direction: column; gap: 6px; }
+  </style>
+</head>
+<body>
+<div class="dash">
+
+  <!-- ── HEADER ────────────────────────────────────────────────────── -->
+  <div class="header">
+    <div style="display:flex;align-items:center;gap:9px">
+      <i class="mdi mdi-car-electric" style="font-size:26px;color:var(--blue)"></i>
+      <div><div class="car-name">Camina</div><div class="car-sub">Kia EV5</div></div>
+    </div>
+    <div class="hstats">
+      <div class="hs"><i class="mdi mdi-lock" style="color:var(--green)"></i><strong>Locked</strong></div>
+      <div class="hs"><i class="mdi mdi-power-plug" style="color:var(--blue)"></i><strong>Plugged In</strong></div>
+      <div class="hs"><i class="mdi mdi-ev-station" style="color:var(--blue)"></i>Charging&nbsp;<strong>11 kW</strong>&nbsp;<span style="font-size:9px;color:var(--dim)">(AC)</span></div>
+      <div class="hs"><i class="mdi mdi-map-marker" style="color:var(--muted)"></i>Home</div>
+      <div class="hs"><i class="mdi mdi-update"></i>Updated just now</div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       ROW 1 — Battery & Range  |  Charging  |  8h Graph
+  ════════════════════════════════════════════════════════════════════ -->
+  <div class="row c3">
+
+    <!-- BATTERY & RANGE -->
+    <div class="card">
+      <div class="ct"><i class="mdi mdi-battery-charging-80"></i> Battery & Range</div>
+      <div class="p">
+        <div class="gauge" style="margin-bottom:10px">
+          <svg viewBox="0 0 200 112" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 20 100 A 80 80 0 0 1 180 100"
+                  fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="14" stroke-linecap="round"/>
+            <path d="M 20 100 A 80 80 0 0 1 180 100"
+                  fill="none" stroke="#22c55e" stroke-width="14" stroke-linecap="round"
+                  stroke-dasharray="201 51"/>
+            <text x="100" y="80" text-anchor="middle"
+                  fill="#f1f5f9" font-size="33" font-weight="700" font-family="Segoe UI,sans-serif">80%</text>
+            <text x="100" y="97" text-anchor="middle"
+                  fill="#94a3b8" font-size="11" font-family="Segoe UI,sans-serif">EV Battery</text>
+          </svg>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="sv" style="color:var(--green)">320 km</div><div class="sl">EV Range</div></div>
+          <div class="stat"><div class="sv" style="color:var(--blue)">45 min</div><div class="sl">AC Charge ETA</div></div>
+          <div class="stat"><div class="sv" style="font-size:14px">1,000 km</div><div class="sl">Odometer</div></div>
+          <div class="stat"><div class="sv">95%</div><div class="sl">12V Battery</div></div>
+          <div class="stat"><div class="sv" style="color:var(--green)">100%</div><div class="sl">Battery Health</div></div>
+          <div class="stat"><div class="sv" style="color:var(--muted);font-size:14px">—</div><div class="sl">DC Fast ETA</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARGING -->
+    <!-- gauge max 150 kW covers DC; light blue band marks AC zone (0–22 kW) -->
+    <!-- 11 kW / 150 kW = 7.3% → dasharray 18 233                            -->
+    <!-- AC zone 22/150 = 14.7% → dasharray 36.8 214.5 (ghost band)          -->
+    <div class="card">
+      <div class="ct"><i class="mdi mdi-ev-station"></i> Charging</div>
+      <div class="p">
+        <div class="gauge" style="margin-bottom:10px">
+          <svg viewBox="0 0 200 115" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 20 100 A 80 80 0 0 1 180 100"
+                  fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="14" stroke-linecap="round"/>
+            <!-- AC zone ghost band -->
+            <path d="M 20 100 A 80 80 0 0 1 180 100"
+                  fill="none" stroke="rgba(59,130,246,0.14)" stroke-width="14" stroke-linecap="round"
+                  stroke-dasharray="36.8 214.5"/>
+            <!-- live value -->
+            <path d="M 20 100 A 80 80 0 0 1 180 100"
+                  fill="none" stroke="#3b82f6" stroke-width="14" stroke-linecap="round"
+                  stroke-dasharray="18 233"/>
+            <text x="15"  y="112" text-anchor="middle" fill="#475569" font-size="8" font-family="Segoe UI,sans-serif">0</text>
+            <text x="185" y="112" text-anchor="middle" fill="#475569" font-size="8" font-family="Segoe UI,sans-serif">150 kW</text>
+            <text x="52"  y="30"  text-anchor="middle" fill="#334d6e" font-size="7.5" font-family="Segoe UI,sans-serif">AC ≤22 kW</text>
+            <text x="100" y="73" text-anchor="middle"
+                  fill="#f1f5f9" font-size="30" font-weight="700" font-family="Segoe UI,sans-serif">11 kW</text>
+            <text x="100" y="91" text-anchor="middle"
+                  fill="#94a3b8" font-size="11" font-family="Segoe UI,sans-serif">Charging Speed</text>
+          </svg>
+        </div>
+        <div class="cg">
+          <div class="chip">
+            <i class="mdi mdi-power-plug" style="color:var(--blue)"></i>
+            <div><div class="cl">Cable</div><div class="cv" style="color:var(--blue)">Plugged In</div></div>
+          </div>
+          <div class="chip">
+            <i class="mdi mdi-ev-station" style="color:var(--blue)"></i>
+            <div><div class="cl">Status</div><div class="cv" style="color:var(--blue)">Charging</div></div>
+          </div>
+          <div class="chip">
+            <i class="mdi mdi-ev-plug-type2" style="color:var(--green)"></i>
+            <div><div class="cl">Charge Port</div><div class="cv" style="color:var(--green)">Closed</div></div>
+          </div>
+          <div class="chip">
+            <i class="mdi mdi-lightning-bolt" style="color:var(--dim)"></i>
+            <div><div class="cl">DC Fast ETA</div><div class="cv" style="color:var(--dim)">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8H CHARGING GRAPH -->
+    <div class="card">
+      <div class="ct"><i class="mdi mdi-chart-line"></i> Charging Speed — Last 8 Hours</div>
+      <div class="p">
+        <svg class="chart-svg" viewBox="0 0 400 110" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="#3b82f6" stop-opacity="0.5"/>
+              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.02"/>
+            </linearGradient>
+            <clipPath id="cc"><rect x="0" y="0" width="400" height="100"/></clipPath>
+          </defs>
+          <line x1="0" y1="63" x2="400" y2="63" stroke="rgba(255,255,255,0.07)" stroke-width="0.7" stroke-dasharray="4 4"/>
+          <line x1="0" y1="37" x2="400" y2="37" stroke="rgba(255,255,255,0.07)" stroke-width="0.7" stroke-dasharray="4 4"/>
+          <line x1="0" y1="10" x2="400" y2="10" stroke="rgba(255,255,255,0.07)" stroke-width="0.7" stroke-dasharray="4 4"/>
+          <text x="3" y="61" fill="#475569" font-size="7.5" font-family="sans-serif"> 5 kW</text>
+          <text x="3" y="35" fill="#475569" font-size="7.5" font-family="sans-serif">10 kW</text>
+          <text x="3" y="9"  fill="#475569" font-size="7.5" font-family="sans-serif">15 kW</text>
+          <polygon clip-path="url(#cc)"
+            points="0,90 150,90 163,80 172,52 180,31 210,31 260,31 310,31 360,31 400,31 400,100 0,100"
+            fill="url(#cg)"/>
+          <polyline clip-path="url(#cc)"
+            points="0,90 150,90 163,80 172,52 180,31 210,31 260,31 310,31 360,31 400,31"
+            fill="none" stroke="#3b82f6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="400" cy="31" r="4" fill="#3b82f6"/>
+          <circle cx="400" cy="31" r="8" fill="none" stroke="#3b82f6" stroke-width="1.5" opacity="0.3"/>
+          <text x="393" y="25" text-anchor="end" fill="#3b82f6" font-size="8" font-family="Segoe UI,sans-serif">11 kW</text>
+        </svg>
+        <div class="cxl"><span>−8h</span><span>−6h</span><span>−4h</span><span>−2h</span><span>Now</span></div>
+      </div>
+    </div>
+
+  </div><!-- /row 1 -->
+
+  <!-- ════════════════════════════════════════════════════════════════
+       ROW 2 — Doors & Security  |  Windows & Tyres  |  Climate  |  Warnings
+  ════════════════════════════════════════════════════════════════════ -->
+  <div class="row c4">
+
+    <!-- DOORS & SECURITY -->
+    <div class="card">
+      <div class="ct"><i class="mdi mdi-car-door"></i> Doors & Security</div>
+      <div class="p">
+        <div class="cg">
+          <!-- Lock -->
+          <div class="chip wide s2">
+            <i class="mdi mdi-lock" style="font-size:24px;color:var(--green)"></i>
+            <div style="text-align:center"><div class="cl">Central Lock</div><div class="cv" style="color:var(--green);font-size:13px">Locked</div></div>
+          </div>
+
+          <div class="sec">Doors</div>
+          <div class="chip"><i class="mdi mdi-car-door" style="color:var(--green)"></i><div><div class="cl">Front Left</div><div class="cv" style="color:var(--green)">Closed</div></div></div>
+          <div class="chip"><i class="mdi mdi-car-door" style="color:var(--green)"></i><div><div class="cl">Front Right</div><div class="cv" style="color:var(--green)">Closed</div></div></div>
+          <div class="chip"><i class="mdi mdi-car-door" style="color:var(--green)"></i><div><div class="cl">Rear Left</div><div class="cv" style="color:var(--green)">Closed</div></div></div>
+          <div class="chip"><i class="mdi mdi-car-door" style="color:var(--green)"></i><div><div class="cl">Rear Right</div><div class="cv" style="color:var(--green)">Closed</div></div></div>
+
+          <div class="sec">Hood · Trunk · Roof</div>
+          <div class="chip"><i class="mdi mdi-car" style="color:var(--green)"></i><div><div class="cl">Hood</div><div class="cv" style="color:var(--green)">Closed</div></div></div>
+          <div class="chip"><i class="mdi mdi-car-back" style="color:var(--green)"></i><div><div class="cl">Trunk</div><div class="cv" style="color:var(--green)">Closed</div></div></div>
+          <div class="chip s2"><i class="mdi mdi-car-convertible" style="color:var(--green)"></i><div><div class="cl">Sunroof / Panoramic Roof</div><div class="cv" style="color:var(--green)">Closed</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WINDOWS & TYRES -->
+    <div class="card">
+      <div class="ct"><i class="mdi mdi-window-closed-variant"></i> Windows & Tyres</div>
+      <div class="p">
+        <div class="cg">
+          <div class="sec">Windows</div>
+          <div class="chip"><i class="mdi mdi-window-closed" style="color:var(--green)"></i><div><div class="cl">Front Left</div><div class="cv" style="color:var(--green)">Closed</div></div></div>
+          <div class="chip"><i class="mdi mdi-window-closed" style="color:var(--green)"></i><div><div class="cl">Front Right</div><div class="cv" style="color:var(--green)">Closed</div></div></div>
+          <div class="chip"><i class="mdi mdi-window-closed" style="color:var(--green)"></i><div><div class="cl">Rear Left</div><div class="cv" style="color:var(--green)">Closed</div></div></div>
+          <div class="chip"><i class="mdi mdi-window-closed" style="color:var(--green)"></i><div><div class="cl">Rear Right</div><div class="cv" style="color:var(--green)">Closed</div></div></div>
+
+          <div class="sec">Tyre Pressure</div>
+          <!-- rollup -->
+          <div class="chip wide s2">
+            <i class="mdi mdi-tire" style="font-size:22px;color:var(--green)"></i>
+            <div style="text-align:center"><div class="cl">All Tyres</div><div class="cv" style="color:var(--green)">OK</div></div>
+          </div>
+        </div>
+        <!-- per-wheel -->
+        <div class="glance gc4" style="margin-top:8px">
+          <div class="gi"><i class="mdi mdi-tire" style="color:var(--green)"></i><strong>FL</strong><span style="color:var(--green)">OK</span></div>
+          <div class="gi"><i class="mdi mdi-tire" style="color:var(--green)"></i><strong>FR</strong><span style="color:var(--green)">OK</span></div>
+          <div class="gi"><i class="mdi mdi-tire" style="color:var(--green)"></i><strong>RL</strong><span style="color:var(--green)">OK</span></div>
+          <div class="gi"><i class="mdi mdi-tire" style="color:var(--green)"></i><strong>RR</strong><span style="color:var(--green)">OK</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIMATE -->
+    <div class="card">
+      <div class="ct"><i class="mdi mdi-air-conditioner"></i> Climate</div>
+      <div class="p">
+        <!-- status + target -->
+        <div class="chip wide" style="justify-content:space-between;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <i class="mdi mdi-air-conditioner" style="font-size:26px;color:var(--dim)"></i>
+            <div><div class="cl">Climate</div><div class="cv" style="color:var(--dim);font-size:14px">Off</div></div>
+          </div>
+          <div style="text-align:right"><div class="cl">Target</div><div style="font-size:20px;font-weight:700">21°C</div></div>
+        </div>
+
+        <!-- defrost row -->
+        <div class="glance gc3" style="margin-bottom:8px">
+          <div class="gi"><i class="mdi mdi-car-defrost-front" style="color:var(--dim)"></i><strong style="color:var(--dim)">Off</strong>Front Defrost</div>
+          <div class="gi"><i class="mdi mdi-car-defrost-rear" style="color:var(--dim)"></i><strong style="color:var(--dim)">Off</strong>Rear Defrost</div>
+          <div class="gi"><i class="mdi mdi-steering" style="color:var(--dim)"></i><strong style="color:var(--dim)">Off</strong>Steer Heat</div>
+          <div class="gi"><i class="mdi mdi-car-side" style="color:var(--dim)"></i><strong style="color:var(--dim)">Off</strong>Mirror Heat</div>
+          <!-- empty spacer -->
+          <div></div><div></div>
+        </div>
+
+        <!-- seat heaters 2×2 -->
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--dim);margin-bottom:5px">Seat Heaters</div>
+        <div class="glance gc4">
+          <div class="gi"><i class="mdi mdi-car-seat-heater" style="color:var(--dim)"></i><strong style="color:var(--dim)">Off</strong>FL</div>
+          <div class="gi"><i class="mdi mdi-car-seat-heater" style="color:var(--dim)"></i><strong style="color:var(--dim)">Off</strong>FR</div>
+          <div class="gi"><i class="mdi mdi-car-seat-heater" style="color:var(--dim)"></i><strong style="color:var(--dim)">Off</strong>RL</div>
+          <div class="gi"><i class="mdi mdi-car-seat-heater" style="color:var(--dim)"></i><strong style="color:var(--dim)">Off</strong>RR</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WARNINGS -->
+    <div class="card">
+      <div class="ct"><i class="mdi mdi-alert-circle-outline"></i> Warnings</div>
+      <div class="p">
+        <div class="warn-stack">
+          <div class="warn-chip">
+            <i class="mdi mdi-key-alert" style="color:var(--green)"></i>
+            <div><div class="cl">Smart Key Battery</div><div class="cv" style="color:var(--green)">OK</div></div>
+          </div>
+          <div class="warn-chip">
+            <i class="mdi mdi-wiper-wash" style="color:var(--green)"></i>
+            <div><div class="cl">Washer Fluid</div><div class="cv" style="color:var(--green)">OK</div></div>
+          </div>
+          <div class="warn-chip">
+            <i class="mdi mdi-alert-circle" style="color:var(--green)"></i>
+            <div><div class="cl">Brake Fluid</div><div class="cv" style="color:var(--green)">OK</div></div>
+          </div>
+          <div class="warn-chip">
+            <i class="mdi mdi-tire" style="color:var(--green)"></i>
+            <div><div class="cl">Tyre Pressure</div><div class="cv" style="color:var(--green)">OK</div></div>
+          </div>
+        </div>
+        <!-- what a warning state looks like -->
+        <div style="margin-top:10px;padding:8px;background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.25);border-radius:8px;font-size:9px;color:var(--dim)">
+          ↑ example: any warning turns icon orange + border highlights card
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /row 2 -->
+
+  <!-- ════════════════════════════════════════════════════════════════
+       ROW 3 — Actions
+  ════════════════════════════════════════════════════════════════════ -->
+  <div class="card">
+    <div class="ct"><i class="mdi mdi-remote"></i> Actions</div>
+    <div class="p">
+      <div class="actions">
+        <button class="act"><i class="mdi mdi-lock" style="color:var(--green)"></i>Lock</button>
+        <button class="act"><i class="mdi mdi-lock-open" style="color:var(--yellow)"></i>Unlock</button>
+        <button class="act"><i class="mdi mdi-air-conditioner" style="color:var(--blue)"></i>Start Climate</button>
+        <button class="act"><i class="mdi mdi-air-conditioner" style="color:var(--muted)"></i>Stop Climate</button>
+        <button class="act"><i class="mdi mdi-ev-station" style="color:var(--cyan)"></i>Start Charge</button>
+        <button class="act"><i class="mdi mdi-ev-station" style="color:var(--muted)"></i>Stop Charge</button>
+        <button class="act"><i class="mdi mdi-ev-plug-type2" style="color:var(--blue)"></i>Open Port</button>
+        <button class="act"><i class="mdi mdi-ev-plug-type2" style="color:var(--muted)"></i>Close Port</button>
+        <button class="act"><i class="mdi mdi-car-door" style="color:var(--blue)"></i>Open Windows</button>
+        <button class="act"><i class="mdi mdi-car-door" style="color:var(--muted)"></i>Close Windows</button>
+        <button class="act"><i class="mdi mdi-refresh" style="color:var(--blue)"></i>Force Update</button>
+        <!-- params = dashed border, needs Developer Tools or future form card -->
+        <button class="act params"><i class="mdi mdi-battery-charging-100" style="color:var(--cyan)"></i>Charge Limits</button>
+        <button class="act params"><i class="mdi mdi-current-ac" style="color:var(--cyan)"></i>Charge Current</button>
+        <button class="act warn"><i class="mdi mdi-hazard-lights" style="color:var(--orange)"></i>Hazard Lights</button>
+        <button class="act warn"><i class="mdi mdi-bullhorn" style="color:var(--orange)"></i>Horn & Lights</button>
+        <div></div><!-- grid spacer -->
+      </div>
+      <div style="margin-top:8px;font-size:9px;color:var(--dim)">
+        Dashed border — requires parameters (charge limit %, current %). Call from Developer Tools or a future input form.
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

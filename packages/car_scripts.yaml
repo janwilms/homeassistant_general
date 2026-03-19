@@ -1,0 +1,302 @@
+# ==============================================================================
+# CAR PACKAGE — SCRIPTS (ACTION PROXIES)
+# Stable action interface — call these from dashboards and automations
+# In mock mode: manipulates mock helpers to simulate car responses
+# In July: replace PLACEHOLDER_KIA_DEVICE_ID with your actual device_id
+#          found in HA Settings → Devices → your Kia device → device info
+# ==============================================================================
+
+script:
+  # --- Lock ---
+  car_lock:
+    alias: "Car Lock"
+    icon: mdi:lock
+    sequence:
+      - if:
+          - condition: template
+            value_template: "{{ states('input_number.mock_car_ev_battery') | float(-1) >= 0 }}"
+        then:
+          # MOCK: flip the boolean
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.mock_car_locked
+        # july: replace entire sequence with:
+        # - action: kia_uvo.lock
+        #   data:
+        #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+        # - delay: "00:00:10"
+        # - action: kia_uvo.force_update
+        #   data:
+        #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+
+  # --- Unlock ---
+  car_unlock:
+    alias: "Car Unlock"
+    icon: mdi:lock-open
+    sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.mock_car_locked
+      # july:
+      # - action: kia_uvo.unlock
+      #   data:
+      #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+      # - delay: "00:00:10"
+      # - action: kia_uvo.force_update
+      #   data:
+      #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+
+  # --- Force Refresh ---
+  # Mock: no-op — mock data doesn't need refreshing
+  # RATE LIMITED in kia mode — do not call more than once per 4 hours
+  car_force_update:
+    alias: "Car Force Update"
+    icon: mdi:refresh
+    sequence:
+      - action: persistent_notification.create
+        data:
+          title: "Car Update"
+          message: "Force update is only available in Kia mode."
+      # july:
+      # - action: kia_uvo.force_update
+      #   data:
+      #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+
+  # --- Start Climate ---
+  car_start_climate:
+    alias: "Car Start Climate"
+    icon: mdi:air-conditioner
+    fields:
+      temperature:
+        description: "Target temperature in °C"
+        default: 21
+        selector:
+          number:
+            min: 14
+            max: 30
+            step: 0.5
+      duration:
+        description: "Duration in minutes"
+        default: 10
+        selector:
+          number:
+            min: 1
+            max: 30
+      defrost:
+        description: "Enable defrost"
+        default: false
+        selector:
+          boolean:
+    sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.mock_car_climate_active
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.mock_car_climate_target_temp
+        data:
+          value: "{{ temperature | default(21) }}"
+      # july:
+      # - action: kia_uvo.start_climate
+      #   data:
+      #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+      #     temperature: "{{ temperature | default(21) }}"
+      #     duration: "{{ duration | default(10) }}"
+      #     climate: true
+      #     defrost: "{{ defrost | default(false) }}"
+      #     heating: "0"
+
+  # --- Stop Climate ---
+  car_stop_climate:
+    alias: "Car Stop Climate"
+    icon: mdi:air-conditioner
+    sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.mock_car_climate_active
+      # july:
+      # - action: kia_uvo.stop_climate
+      #   data:
+      #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+
+  # --- Start Charging ---
+  # Note: EU EV5 support not fully confirmed — test on delivery
+  car_start_charging:
+    alias: "Car Start Charging"
+    icon: mdi:ev-station
+    sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.mock_car_charging
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.mock_car_plugged_in
+      # july:
+      # - action: kia_uvo.start_charging
+      #   data:
+      #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+
+  # --- Stop Charging ---
+  car_stop_charging:
+    alias: "Car Stop Charging"
+    icon: mdi:ev-station
+    sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.mock_car_charging
+      # july:
+      # - action: kia_uvo.stop_charging
+      #   data:
+      #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+
+  # --- Hazard Lights (EU only, kia mode only) ---
+  car_hazard_lights:
+    alias: "Car Hazard Lights"
+    icon: mdi:hazard-lights
+    sequence:
+      - action: persistent_notification.create
+        data:
+          title: "Car Hazard Lights"
+          message: "Hazard lights are only available in Kia mode."
+      # july:
+      # - action: kia_uvo.start_hazard_lights
+      #   data:
+      #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+
+  # --- Horn + Hazard Lights (EU only, kia mode only) ---
+  car_horn_and_lights:
+    alias: "Car Horn and Lights"
+    icon: mdi:bullhorn
+    sequence:
+      - action: persistent_notification.create
+        data:
+          title: "Car Horn and Lights"
+          message: "Horn and lights are only available in Kia mode."
+      # july:
+      # - action: kia_uvo.start_hazard_lights_and_horn
+      #   data:
+      #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+
+  # --- Open Windows ---
+  # NOT YET IMPLEMENTED in kia_uvo for EU Kia vehicles
+  # Track: github.com/Hyundai-Kia-Connect/kia_uvo issue #957
+  car_open_windows:
+    alias: "Car Open Windows"
+    icon: mdi:car-door
+    sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id:
+            - input_boolean.mock_car_window_fl
+            - input_boolean.mock_car_window_fr
+            - input_boolean.mock_car_window_rl
+            - input_boolean.mock_car_window_rr
+      # july: uncomment when kia_uvo implements the service
+      # - action: kia_uvo.open_windows
+      #   data:
+      #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+
+  # --- Close Windows ---
+  car_close_windows:
+    alias: "Car Close Windows"
+    icon: mdi:car-door
+    sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+            - input_boolean.mock_car_window_fl
+            - input_boolean.mock_car_window_fr
+            - input_boolean.mock_car_window_rl
+            - input_boolean.mock_car_window_rr
+      # july: uncomment when kia_uvo implements the service
+      # - action: kia_uvo.close_windows
+      #   data:
+      #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+
+  # --- Open Charge Port ---
+  car_open_charge_port:
+    alias: "Car Open Charge Port"
+    icon: mdi:ev-plug-type2
+    sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.mock_car_charge_port
+      # july:
+      # - action: kia_uvo.open_charge_port
+      #   data:
+      #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+
+  # --- Close Charge Port ---
+  car_close_charge_port:
+    alias: "Car Close Charge Port"
+    icon: mdi:ev-plug-type2
+    sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.mock_car_charge_port
+      # july:
+      # - action: kia_uvo.close_charge_port
+      #   data:
+      #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+
+  # --- Set Charge Limits ---
+  # Sets the target charge level for AC and DC charging separately.
+  # Mock: notification only — no mock state for charge limits.
+  car_set_charge_limits:
+    alias: "Car Set Charge Limits"
+    icon: mdi:battery-charging-100
+    fields:
+      ac_limit:
+        description: "AC charge limit % (50–100)"
+        default: 80
+        selector:
+          number:
+            min: 50
+            max: 100
+            step: 10
+      dc_limit:
+        description: "DC charge limit % (50–100)"
+        default: 100
+        selector:
+          number:
+            min: 50
+            max: 100
+            step: 10
+    sequence:
+      - action: persistent_notification.create
+        data:
+          title: "Car Charge Limits"
+          message: "Set charge limits is only available in Kia mode. AC: {{ ac_limit | default(80) }}%  DC: {{ dc_limit | default(100) }}%"
+      # july:
+      # - action: kia_uvo.set_charge_limits
+      #   data:
+      #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+      #     ac_limit: "{{ ac_limit | default(80) }}"
+      #     dc_limit: "{{ dc_limit | default(100) }}"
+
+  # --- Set Charging Current ---
+  # Available values: 100, 90, 60 (percent of max current)
+  # Mock: notification only.
+  car_set_charging_current:
+    alias: "Car Set Charging Current"
+    icon: mdi:current-ac
+    fields:
+      current:
+        description: "Charging current % (60, 90, or 100)"
+        default: 100
+        selector:
+          select:
+            options:
+              - "100"
+              - "90"
+              - "60"
+    sequence:
+      - action: persistent_notification.create
+        data:
+          title: "Car Charging Current"
+          message: "Set charging current is only available in Kia mode. Current: {{ current | default(100) }}%"
+      # july:
+      # - action: kia_uvo.set_charging_current
+      #   data:
+      #     device_id: "PLACEHOLDER_KIA_DEVICE_ID"
+      #     current: "{{ current | default(100) }}"
