@@ -1,4 +1,4 @@
-alias: "EV Charging Point Became Available"
+alias: "EV Charging Point Became Available (v2)"
 description: "Notify when a charging point becomes available while in zone with low battery"
 trigger:
   - platform: state
@@ -13,21 +13,21 @@ condition:
       {% set current_madras = states('sensor.madrasstraat_chargers') | int(0) %}
       {% set current_napels = states('sensor.napelsstraat_chargers') | int(0) %}
       {% set current_total = current_cadix + current_madras + current_napels %}
-      
+
       {% set previous_cadix = trigger.from_state.state | int(0) if trigger.entity_id == 'sensor.cadixstraat_chargers' else states('sensor.cadixstraat_chargers') | int(0) %}
       {% set previous_madras = trigger.from_state.state | int(0) if trigger.entity_id == 'sensor.madrasstraat_chargers' else states('sensor.madrasstraat_chargers') | int(0) %}
       {% set previous_napels = trigger.from_state.state | int(0) if trigger.entity_id == 'sensor.napelsstraat_chargers' else states('sensor.napelsstraat_chargers') | int(0) %}
       {% set previous_total = previous_cadix + previous_madras + previous_napels %}
-      
+
       {{ current_total > previous_total }}
   - condition: zone
-    entity_id: device_tracker.fbf5ada71c61baaa1ada0b0d901c94ee  # Your phone's device tracker
+    entity_id: device_tracker.pixel_8_3
     zone: zone.ev_trigger_zone
   - condition: zone
-    entity_id: device_tracker.2cjn170_caitlyn_device_tracker  # Your car's device tracker
+    entity_id: device_tracker.2cjn170_caitlyn_device_tracker
     zone: zone.ev_trigger_zone
   - condition: numeric_state
-    entity_id: sensor.car_battery_level  # Replace with your actual car battery sensor
+    entity_id: sensor.2cjn170_caitlyn_state_of_charge
     below: 50
 action:
   - variables:
@@ -45,4 +45,4 @@ action:
         ttl: 0
         priority: high
         importance: high
-mode: single 
+mode: single

@@ -1,0 +1,163 @@
+# EV Charging availability via TomTom EV Charging Stations Availability API.
+# Replaces the broken Shell Recharge integration. One REST resource per
+# station (availability endpoint is single-station only). Polled every 10 min
+# (432 req/day for 3 stations, ~17% of the 2500/day Freemium quota).
+#
+# The rest sensors are the raw fetch layer and expose the full `connectors`
+# array as an attribute. The template sensors derive the user-facing state
+# and attributes (state + total_spots, occupied, out_of_service, friendly_text).
+# The `_raw` entities are implementation detail — not used by automations
+# or dashboards.
+
+rest:
+  - resource: https://api.tomtom.com/search/2/chargingAvailability.json
+    params:
+      key: !secret tomtom_api_key
+      chargingAvailability: !secret tomtom_station_id_napelsstraat
+    scan_interval: 600
+    sensor:
+      - name: "Napelsstraat Chargers Raw"
+        unique_id: napelsstraat_chargers_raw_tomtom
+        value_template: >
+          {% set connectors = value_json.connectors | default([]) %}
+          {% set ns = namespace(a=0) %}
+          {% for c in connectors %}
+            {% set ns.a = ns.a + (c.availability.current.available | default(0)) %}
+          {% endfor %}
+          {{ ns.a }}
+        json_attributes:
+          - connectors
+
+  - resource: https://api.tomtom.com/search/2/chargingAvailability.json
+    params:
+      key: !secret tomtom_api_key
+      chargingAvailability: !secret tomtom_station_id_cadixstraat
+    scan_interval: 600
+    sensor:
+      - name: "Cadixstraat Chargers Raw"
+        unique_id: cadixstraat_chargers_raw_tomtom
+        value_template: >
+          {% set connectors = value_json.connectors | default([]) %}
+          {% set ns = namespace(a=0) %}
+          {% for c in connectors %}
+            {% set ns.a = ns.a + (c.availability.current.available | default(0)) %}
+          {% endfor %}
+          {{ ns.a }}
+        json_attributes:
+          - connectors
+
+  - resource: https://api.tomtom.com/search/2/chargingAvailability.json
+    params:
+      key: !secret tomtom_api_key
+      chargingAvailability: !secret tomtom_station_id_madrasstraat
+    scan_interval: 600
+    sensor:
+      - name: "Madrasstraat Chargers Raw"
+        unique_id: madrasstraat_chargers_raw_tomtom
+        value_template: >
+          {% set connectors = value_json.connectors | default([]) %}
+          {% set ns = namespace(a=0) %}
+          {% for c in connectors %}
+            {% set ns.a = ns.a + (c.availability.current.available | default(0)) %}
+          {% endfor %}
+          {{ ns.a }}
+        json_attributes:
+          - connectors
+
+template:
+  - sensor:
+      - name: "Napelsstraat Chargers"
+        unique_id: napelsstraat_chargers_tomtom
+        state: "{{ states('sensor.napelsstraat_chargers_raw') }}"
+        icon: >-
+          {% if states('sensor.napelsstraat_chargers_raw') | int(0) > 0 %}
+          mdi:ev-station
+          {% else %}
+          mdi:ev-station-outline
+          {% endif %}
+        attributes:
+          total_spots: >
+            {% set c = state_attr('sensor.napelsstraat_chargers_raw', 'connectors') or [] %}
+            {% set ns = namespace(t=0) %}
+            {% for x in c %}{% set ns.t = ns.t + (x.total | default(0)) %}{% endfor %}
+            {{ ns.t }}
+          occupied: >
+            {% set c = state_attr('sensor.napelsstraat_chargers_raw', 'connectors') or [] %}
+            {% set ns = namespace(o=0) %}
+            {% for x in c %}{% set ns.o = ns.o + (x.availability.current.occupied | default(0)) %}{% endfor %}
+            {{ ns.o }}
+          out_of_service: >
+            {% set c = state_attr('sensor.napelsstraat_chargers_raw', 'connectors') or [] %}
+            {% set ns = namespace(o=0) %}
+            {% for x in c %}{% set ns.o = ns.o + (x.availability.current.outOfService | default(0)) %}{% endfor %}
+            {{ ns.o }}
+          friendly_text: >
+            {% set avail = states('sensor.napelsstraat_chargers_raw') | int(0) %}
+            {% set c = state_attr('sensor.napelsstraat_chargers_raw', 'connectors') or [] %}
+            {% set ns = namespace(t=0) %}
+            {% for x in c %}{% set ns.t = ns.t + (x.total | default(0)) %}{% endfor %}
+            {{ avail }}/{{ ns.t }} Available
+
+      - name: "Cadixstraat Chargers"
+        unique_id: cadixstraat_chargers_tomtom
+        state: "{{ states('sensor.cadixstraat_chargers_raw') }}"
+        icon: >-
+          {% if states('sensor.cadixstraat_chargers_raw') | int(0) > 0 %}
+          mdi:ev-station
+          {% else %}
+          mdi:ev-station-outline
+          {% endif %}
+        attributes:
+          total_spots: >
+            {% set c = state_attr('sensor.cadixstraat_chargers_raw', 'connectors') or [] %}
+            {% set ns = namespace(t=0) %}
+            {% for x in c %}{% set ns.t = ns.t + (x.total | default(0)) %}{% endfor %}
+            {{ ns.t }}
+          occupied: >
+            {% set c = state_attr('sensor.cadixstraat_chargers_raw', 'connectors') or [] %}
+            {% set ns = namespace(o=0) %}
+            {% for x in c %}{% set ns.o = ns.o + (x.availability.current.occupied | default(0)) %}{% endfor %}
+            {{ ns.o }}
+          out_of_service: >
+            {% set c = state_attr('sensor.cadixstraat_chargers_raw', 'connectors') or [] %}
+            {% set ns = namespace(o=0) %}
+            {% for x in c %}{% set ns.o = ns.o + (x.availability.current.outOfService | default(0)) %}{% endfor %}
+            {{ ns.o }}
+          friendly_text: >
+            {% set avail = states('sensor.cadixstraat_chargers_raw') | int(0) %}
+            {% set c = state_attr('sensor.cadixstraat_chargers_raw', 'connectors') or [] %}
+            {% set ns = namespace(t=0) %}
+            {% for x in c %}{% set ns.t = ns.t + (x.total | default(0)) %}{% endfor %}
+            {{ avail }}/{{ ns.t }} Available
+
+      - name: "Madrasstraat Chargers"
+        unique_id: madrasstraat_chargers_tomtom
+        state: "{{ states('sensor.madrasstraat_chargers_raw') }}"
+        icon: >-
+          {% if states('sensor.madrasstraat_chargers_raw') | int(0) > 0 %}
+          mdi:ev-station
+          {% else %}
+          mdi:ev-station-outline
+          {% endif %}
+        attributes:
+          total_spots: >
+            {% set c = state_attr('sensor.madrasstraat_chargers_raw', 'connectors') or [] %}
+            {% set ns = namespace(t=0) %}
+            {% for x in c %}{% set ns.t = ns.t + (x.total | default(0)) %}{% endfor %}
+            {{ ns.t }}
+          occupied: >
+            {% set c = state_attr('sensor.madrasstraat_chargers_raw', 'connectors') or [] %}
+            {% set ns = namespace(o=0) %}
+            {% for x in c %}{% set ns.o = ns.o + (x.availability.current.occupied | default(0)) %}{% endfor %}
+            {{ ns.o }}
+          out_of_service: >
+            {% set c = state_attr('sensor.madrasstraat_chargers_raw', 'connectors') or [] %}
+            {% set ns = namespace(o=0) %}
+            {% for x in c %}{% set ns.o = ns.o + (x.availability.current.outOfService | default(0)) %}{% endfor %}
+            {{ ns.o }}
+          friendly_text: >
+            {% set avail = states('sensor.madrasstraat_chargers_raw') | int(0) %}
+            {% set c = state_attr('sensor.madrasstraat_chargers_raw', 'connectors') or [] %}
+            {% set ns = namespace(t=0) %}
+            {% for x in c %}{% set ns.t = ns.t + (x.total | default(0)) %}{% endfor %}
+            {{ avail }}/{{ ns.t }} Available

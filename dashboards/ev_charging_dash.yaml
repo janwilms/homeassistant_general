@@ -1,0 +1,94 @@
+views:
+  - type: sections
+    title: EV Charging
+    path: ev-charging
+    icon: mdi:ev-station
+    max_columns: 3
+    sections:
+      - type: grid
+        column_span: 3
+        cards:
+          - type: heading
+            heading: Nearby EV Charging
+            heading_style: title
+            icon: mdi:ev-station
+            badges:
+              - entity: sensor.cadixstraat_chargers
+                name: Cadix
+              - entity: sensor.madrasstraat_chargers
+                name: Madras
+              - entity: sensor.napelsstraat_chargers
+                name: Napels
+      - type: grid
+        column_span: 1
+        cards:
+          - type: heading
+            heading: Cadixstraat
+            heading_style: subtitle
+            icon: mdi:ev-station
+          - type: tile
+            entity: sensor.cadixstraat_chargers
+            name: Available
+            icon: mdi:ev-station
+            state_color: true
+            features_position: bottom
+            vertical: false
+            grid_options:
+              columns: 12
+              rows: 1
+          - type: markdown
+            content: |
+              **{{ state_attr('sensor.cadixstraat_chargers', 'friendly_text') }}**
+              — occupied {{ state_attr('sensor.cadixstraat_chargers', 'occupied') }}
+              · out of service {{ state_attr('sensor.cadixstraat_chargers', 'out_of_service') }}
+      - type: grid
+        column_span: 1
+        cards:
+          - type: heading
+            heading: Madrasstraat
+            heading_style: subtitle
+            icon: mdi:ev-station
+          - type: tile
+            entity: sensor.madrasstraat_chargers
+            name: Available
+            icon: mdi:ev-station
+            state_color: true
+            features_position: bottom
+            vertical: false
+            grid_options:
+              columns: 12
+              rows: 1
+          - type: markdown
+            content: |
+              **{{ state_attr('sensor.madrasstraat_chargers', 'friendly_text') }}**
+              — occupied {{ state_attr('sensor.madrasstraat_chargers', 'occupied') }}
+              · out of service {{ state_attr('sensor.madrasstraat_chargers', 'out_of_service') }}
+      - type: grid
+        column_span: 1
+        cards:
+          - type: heading
+            heading: Napelsstraat
+            heading_style: subtitle
+            icon: mdi:ev-station
+          - type: tile
+            entity: sensor.napelsstraat_chargers
+            name: Available
+            icon: mdi:ev-station
+            state_color: true
+            features_position: bottom
+            vertical: false
+            grid_options:
+              columns: 12
+              rows: 1
+          - type: markdown
+            content: |
+              **{{ state_attr('sensor.napelsstraat_chargers', 'friendly_text') }}**
+              — occupied {{ state_attr('sensor.napelsstraat_chargers', 'occupied') }}
+              · out of service {{ state_attr('sensor.napelsstraat_chargers', 'out_of_service') }}
+      - type: grid
+        column_span: 3
+        cards:
+          - type: markdown
+            content: >
+              Data © [TomTom](https://www.tomtom.com) — EV Charging Stations
+              Availability API. Updated every 10 minutes.

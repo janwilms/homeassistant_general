@@ -1,2 +1,4 @@
 .claude/
 .vscode/
+secrets.yaml
+plans/

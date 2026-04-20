@@ -1,8 +1,8 @@
-alias: Arriving Home - EV Charging Notification
+alias: Arriving Home - EV Charging Notification (v2)
 description: ""
 triggers:
   - trigger: zone
-    entity_id: device_tracker.pixel_8_4
+    entity_id: device_tracker.pixel_8_3
     zone: zone.ev_trigger_zone
     event: enter
 conditions:
