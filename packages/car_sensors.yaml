@@ -7,7 +7,6 @@
 
 template:
   - sensor:
-
       - name: "Car EV Battery"
         unique_id: car_ev_battery
         unit_of_measurement: "%"
@@ -91,3 +90,19 @@ template:
         state_class: measurement
         icon: mdi:battery-heart
         state: "{{ states('sensor.car_battery_soh_source') }}"
+
+      - name: "Car End of Charge"
+        unique_id: car_end_of_charge
+        icon: mdi:clock-end
+        state: >
+          {% set src = states('sensor.car_end_of_charge_source') %}
+          {% if src in ['unknown', 'unavailable', 'none', '', 'None'] %}
+            --:--
+          {% else %}
+            {% set end_dt = as_local(as_datetime(src)) %}
+            {% if end_dt.date() > now().date() %}
+              {{ end_dt.strftime('%H:%M') }} ({{ end_dt.strftime('%d/%m') }})
+            {% else %}
+              {{ end_dt.strftime('%H:%M') }}
+            {% endif %}
+          {% endif %}

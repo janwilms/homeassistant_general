@@ -24,7 +24,7 @@ template:
       - name: "Car EV Battery Source"
         unique_id: car_ev_battery_source
         unit_of_measurement: "%"
-        state: "{{ states('input_number.mock_car_ev_battery') }}"
+        state: "{{ states('sensor.2cjn170_caitlyn_state_of_charge') }}"
         # july: "{{ states('sensor.camina_ev_battery_level') }}"
 
       - name: "Car 12V Battery Source"
@@ -36,7 +36,7 @@ template:
       - name: "Car EV Range Source"
         unique_id: car_ev_range_source
         unit_of_measurement: km
-        state: "{{ states('input_number.mock_car_ev_range') }}"
+        state: "{{ states('sensor.2cjn170_caitlyn_range_electric') }}"
         # july: "{{ states('sensor.camina_ev_range') }}"
 
       - name: "Car Total Range Source"
@@ -60,7 +60,7 @@ template:
       - name: "Car Charging Power Source"
         unique_id: car_charging_power_source
         unit_of_measurement: kW
-        state: "{{ states('input_number.mock_car_charging_power') }}"
+        state: "{{ states('sensor.2cjn170_caitlyn_charging_power') }}"
         # july: "{{ states('sensor.camina_ev_charging_power') }}"
 
       - name: "Car Climate Target Temp Source"
@@ -91,6 +91,13 @@ template:
         state: "{{ states('input_number.mock_car_battery_soh') }}"
         # july: "{{ states('sensor.camina_ev_state_of_health') }}"
 
+      - name: "Car End of Charge Source"
+        unique_id: car_end_of_charge_source
+        state: "{{ states('sensor.2cjn170_caitlyn_end_of_charge') }}"
+        # july: >
+        #   {% set mins = states('sensor.camina_estimated_charge_duration') | float(-1) %}
+        #   {{ 'unknown' if mins < 0 else (now() + timedelta(minutes=mins)).isoformat() }}
+
   # ----------------------------------------------------------------------------
   # BOOLEAN SOURCES
   # ----------------------------------------------------------------------------
@@ -98,7 +105,7 @@ template:
   - binary_sensor:
       - name: "Car Charging Source"
         unique_id: car_charging_source
-        state: "{{ is_state('input_boolean.mock_car_charging', 'on') }}"
+        state: "{{ is_state('binary_sensor.2cjn170_caitlyn_charging_active', 'on') }}"
         # july: "{{ is_state('binary_sensor.camina_ev_battery_charge', 'on') }}"
 
       - name: "Car Plugged In Source"

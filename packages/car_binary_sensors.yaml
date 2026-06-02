@@ -7,7 +7,6 @@
 
 template:
   - binary_sensor:
-
       - name: "Car Charging"
         unique_id: car_charging
         device_class: battery_charging

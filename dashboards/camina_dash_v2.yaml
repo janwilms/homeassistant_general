@@ -182,24 +182,6 @@ views:
             name: Locked
             icon: mdi:car-door-lock
             state_color: true
-          - type: glance
-            entities:
-              - entity: binary_sensor.car_front_left_door
-                name: Front Left
-                icon: mdi:car-door-lock
-              - entity: binary_sensor.car_front_right_door
-                name: Front Right
-                icon: mdi:car-door-lock
-              - entity: binary_sensor.car_rear_left_door
-                name: Rear Left
-                icon: mdi:car-door-lock
-              - entity: binary_sensor.car_rear_right_door
-                name: Rear Right
-                icon: mdi:car-door-lock
-            show_name: true
-            show_icon: true
-            show_state: false
-            state_color: true
           - type: tile
             entity: binary_sensor.car_hood
             name: Hood
@@ -224,7 +206,29 @@ views:
             grid_options:
               columns: 4
               rows: 1
-          - type: glance
+          - show_name: true
+            show_icon: true
+            show_state: false
+            type: glance
+            entities:
+              - entity: binary_sensor.car_front_left_door
+                name: Front Left
+                icon: mdi:car-door-lock
+              - entity: binary_sensor.car_front_right_door
+                name: Front Right
+                icon: mdi:car-door-lock
+              - entity: binary_sensor.car_rear_left_door
+                name: Rear Left
+                icon: mdi:car-door-lock
+              - entity: binary_sensor.car_rear_right_door
+                name: Rear Right
+                icon: mdi:car-door-lock
+            state_color: true
+            title: Locks
+          - show_name: true
+            show_icon: true
+            show_state: false
+            type: glance
             entities:
               - entity: binary_sensor.car_front_left_window
                 name: Front Left
@@ -238,36 +242,8 @@ views:
               - entity: binary_sensor.car_rear_right_window
                 name: Rear Right
                 icon: mdi:car-door
-            show_name: true
-            show_icon: true
-            show_state: false
             state_color: true
-          - type: tile
-            entity: binary_sensor.car_tpms_warning
-            name: TPMS Warning
-            icon: mdi:tire-alert
-            state_color: true
-            grid_options:
-              columns: 6
-              rows: 1
-          - type: glance
-            entities:
-              - entity: binary_sensor.car_tpms_fl
-                name: FL
-                icon: mdi:tire
-              - entity: binary_sensor.car_tpms_fr
-                name: FR
-                icon: mdi:tire
-              - entity: binary_sensor.car_tpms_rl
-                name: RL
-                icon: mdi:tire
-              - entity: binary_sensor.car_tpms_rr
-                name: RR
-                icon: mdi:tire
-            show_name: true
-            show_icon: true
-            show_state: false
-            state_color: true
+            title: Windows
       - type: grid
         column_span: 1
         cards:
@@ -295,6 +271,14 @@ views:
             entity: binary_sensor.car_brake_fluid_warning
             name: Brake Fluid
             icon: mdi:car-brake-alert
+            state_color: true
+            grid_options:
+              columns: 6
+              rows: 1
+          - type: tile
+            entity: binary_sensor.car_tpms_warning
+            name: TPMS Warning
+            icon: mdi:tire-alert
             state_color: true
             grid_options:
               columns: 6
