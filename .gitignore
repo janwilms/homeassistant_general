@@ -3,3 +3,5 @@
 secrets.yaml
 plans/
 builder/
+esphome/secrets.yaml
+esphome/.esphome/

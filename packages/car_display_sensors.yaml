@@ -1,0 +1,150 @@
+# ==============================================================================
+# CAR DISPLAY SENSORS
+# ==============================================================================
+# All sensors here are formatted strings, booleans or aggregates
+# intended purely for display — not used elsewhere in automations or logic.
+# ==============================================================================
+
+template:
+  - sensor:
+      - name: "Car Display Name"
+        unique_id: car_display_name
+        icon: mdi:car
+        state: "2-CJN-170 Caitlyn"
+        # camina: change to "Camina" or any display name you want
+
+      - name: "Car Display Secured"
+        unique_id: car_display_secured
+        icon: mdi:shield-lock
+        state: >
+          {{ is_state('lock.2cjn170_caitlyn_lock', 'locked')
+             and is_state('binary_sensor.2cjn170_caitlyn_windows_closed', 'on') }}
+        # camina: expand with doors/trunk/hood/sunroof:
+        # {{ is_state('lock.camina_lock', 'locked')
+        #    and is_state('binary_sensor.camina_trunk_is_open', 'off')
+        #    and is_state('binary_sensor.camina_hood_is_open', 'off')
+        #    and is_state('binary_sensor.camina_sunroof_is_open', 'off')
+        #    and is_state('binary_sensor.camina_front_left_window_is_open', 'off')
+        #    and is_state('binary_sensor.camina_front_right_window_is_open', 'off')
+        #    and is_state('binary_sensor.camina_back_left_window_is_open', 'off')
+        #    and is_state('binary_sensor.camina_back_right_window_is_open', 'off') }}
+
+      - name: "Car Secured Text"
+        unique_id: car_display_secured_text
+        icon: mdi:shield-lock
+        state: >
+          {{ 'Secured' if is_state('sensor.car_display_secured', 'True') else 'Not Secured' }}
+
+      - name: "Car End of Charge"
+        unique_id: car_display_end_of_charge
+        icon: mdi:clock-end
+        state: >
+          {% set src = states('sensor.2cjn170_caitlyn_end_of_charge') %}
+          {% if src in ['unknown', 'unavailable', 'none', '', 'None'] %}
+            --:--
+          {% else %}
+            {% set end_dt = as_local(as_datetime(src)) %}
+            {% if end_dt.date() > now().date() %}
+              {{ end_dt.strftime('%H:%M') }} ({{ end_dt.strftime('%d/%m') }})
+            {% else %}
+              {{ end_dt.strftime('%H:%M') }}
+            {% endif %}
+          {% endif %}
+        # camina: Kia gives minutes remaining, not a timestamp. Calculate end time:
+        # {% set ac_mins = states('sensor.camina_ev_estimated_current_charge_duration') | float(-1) %}
+        # {% set dc_mins = states('sensor.camina_ev_estimated_fast_charge_duration') | float(-1) %}
+        # {% set mins = ac_mins if ac_mins >= 0 else dc_mins %}
+        # {% set src = 'unknown' if mins < 0 else (now() + timedelta(minutes=mins)).isoformat() %}
+        # Then same formatting logic as above.
+
+      - name: "Car Display Charging Zone"
+        unique_id: car_display_charging_zone
+        icon: mdi:map-marker
+        state: >-
+          {% if is_state('binary_sensor.2cjn170_caitlyn_charging_active', 'on') %}
+            {% set loc = states('device_tracker.2cjn170_caitlyn_device_tracker') %}
+            {% set short = {
+              'home': 'Home',
+              'not_home': 'Other',
+              'Larger Home Zone': 'Home',
+              'Greenyard Office': 'Greenyard',
+              'Greenyard Parking Lot': 'Greenyard'
+            } %}
+            {{ short.get(loc, loc | replace(' Chargers', '')) }}
+          {%- else -%}
+            none
+          {%- endif %}
+        # camina: swap to binary_sensor.camina_ev_battery_charge + camina device_tracker
+
+# ==============================================================================
+# IDEAS FOR CAMINA (july 2026)
+# ==============================================================================
+
+      # --- Car Secure ---
+      # Single boolean: true if locked + all doors/windows/trunk/hood/sunroof closed.
+      # Use on display as one icon: green lock = secure, red = something open/unlocked.
+      #
+      # - name: "Car Secured"
+      #   unique_id: car_display_secured
+      #   icon: mdi:shield-car
+      #   state: >
+      #     {{ is_state('lock.camina_lock', 'locked')
+      #        and is_state('binary_sensor.camina_trunk_is_open', 'off')
+      #        and is_state('binary_sensor.camina_hood_is_open', 'off')
+      #        and is_state('binary_sensor.camina_sunroof_is_open', 'off')
+      #        and is_state('binary_sensor.camina_front_left_window_is_open', 'off')
+      #        and is_state('binary_sensor.camina_front_right_window_is_open', 'off')
+      #        and is_state('binary_sensor.camina_back_left_window_is_open', 'off')
+      #        and is_state('binary_sensor.camina_back_right_window_is_open', 'off') }}
+
+      # --- Car Charge Status (display string) ---
+      # Camina has more granularity than Caitlyn:
+      #   plugged_in + charging      → "Charging"
+      #   plugged_in + not charging  → "Plugged in"
+      #   charge port open           → "Port open"
+      #   none of the above          → "Unplugged"
+      # Use this string to pick the right MDI icon in the ESP lambda.
+      #
+      # - name: "Car Charge Status"
+      #   unique_id: car_display_charge_status
+      #   icon: mdi:ev-station
+      #   state: >
+      #     {% if is_state('binary_sensor.camina_ev_battery_is_charging', 'on') %}
+      #       charging
+      #     {% elif is_state('binary_sensor.camina_ev_battery_is_plugged_in', 'on') %}
+      #       plugged_in
+      #     {% elif is_state('binary_sensor.camina_ev_charge_port_door_is_open', 'on') %}
+      #       port_open
+      #     {% else %}
+      #       unplugged
+      #     {% endif %}
+
+      # --- Car Climate Active (aggregate) ---
+      # Single boolean: true if ANY climate/heating feature is on.
+      # Tab 1: show one icon (fan or snowflake) with warning if active.
+      # Tab 2: individual binary sensors to see exactly what's on.
+      #
+      # - name: "Car Climate Active"
+      #   unique_id: car_display_climate_active
+      #   icon: mdi:fan
+      #   state: >
+      #     {{ is_state('binary_sensor.camina_air_control_is_on', 'on')
+      #        or is_state('binary_sensor.camina_defrost_is_on', 'on')
+      #        or is_state('binary_sensor.camina_steering_wheel_heater_is_on', 'on')
+      #        or is_state('binary_sensor.camina_back_window_heater_is_on', 'on')
+      #        or is_state('binary_sensor.camina_side_mirror_heater_is_on', 'on')
+      #        or is_state('binary_sensor.camina_front_left_seat_heater_on', 'on')
+      #        or is_state('binary_sensor.camina_front_right_seat_heater_on', 'on') }}
+
+      # --- Dashboard v3 ideas ---
+      # - Consumption vs regeneration twin-line graph (ApexCharts)
+      #   Sources: sensor.camina_total_power_consumed + sensor.camina_total_power_regenerated
+      #   Both are state_class: total so HA builds long-term history automatically.
+      #   sensor.camina_power_consumption_30d for rolling efficiency trendline.
+      # - Tab 1: aggregate status icons (Car Secure, Car Climate Active, charge status)
+      # - Tab 2: all individual sensors (doors, windows, heaters, TPMS, warnings)
+
+      # --- Trigger-based refresh for laadpalen + car stats ---
+      # Add on_value triggers to cadixstraat/napelsstraat/madrasstraat text_sensors
+      # in the ESP for immediate refresh on charger status change.
+      # For car stats: keep 5-min update_interval, no extra trigger needed.

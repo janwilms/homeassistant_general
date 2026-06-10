@@ -1,0 +1,304 @@
+esphome:
+  name: charging-dash
+  friendly_name: Charging Dash
+  on_boot:
+    priority: -100
+    then:
+      - light.turn_on:
+          id: zone_leds
+          effect: "zone_colors"
+          brightness: 25%
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+logger:
+
+api:
+  encryption:
+    key: !secret charging_dash_api_key
+
+ota:
+  - platform: esphome
+    password: !secret charging_dash_ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "Charging-Dash Fallback Hotspot"
+    password: !secret charging_dash_ap_password
+
+captive_portal:
+
+time:
+  - platform: homeassistant
+    id: ha_time
+
+spi:
+  clk_pin: GPIO13
+  mosi_pin: GPIO14
+
+font:
+  - file: "gfonts://Audiowide"
+    id: font_small
+    size: 18
+  - file: "gfonts://Audiowide"
+    id: font_medium
+    size: 26
+  - file: "gfonts://Audiowide"
+    id: font_large
+    size: 52
+  - file: "https://github.com/Templarian/MaterialDesign-Webfont/raw/master/fonts/materialdesignicons-webfont.ttf"
+    id: mdi_large
+    size: 48
+    glyphs:
+      - "\U000F007D"  # mdi:battery (large)
+      - "\U000F151E"  # mdi:ev-plug
+      - "\U000F05F1"  # mdi:ev-station (large)
+      - "\U000F0CC8"  # mdi:shield-lock (secured)
+      - "\U000F099E"  # mdi:shield-alert (not secured)
+      - "\U000F0152"  # mdi:clock-end (large)
+      - "\U000F0599"  # mdi:weather-sunny
+      - "\U000F0595"  # mdi:weather-partly-cloudy
+      - "\U000F0590"  # mdi:weather-cloudy
+      - "\U000F0597"  # mdi:weather-rainy
+      - "\U000F0596"  # mdi:weather-pouring
+      - "\U000F0593"  # mdi:weather-lightning
+      - "\U000F067E"  # mdi:weather-lightning-rainy
+      - "\U000F0591"  # mdi:weather-fog
+      - "\U000F059D"  # mdi:weather-windy
+      - "\U000F0598"  # mdi:weather-snowy
+
+light:
+  - platform: neopixelbus
+    type: GRB
+    variant: SK6812
+    pin: GPIO4
+    num_leds: 3
+    name: "Charging Zone LEDs"
+    id: zone_leds
+    default_transition_length: 2s
+    restore_mode: ALWAYS_ON
+    effects:
+      - addressable_lambda:
+          name: "zone_colors"
+          update_interval: 2min
+          lambda: |-
+            auto color_for = [](float val) -> Color {
+              int free = isnan(val) ? -1 : (int)val;
+              if (free >= 2) return Color(0, 255, 0);    // green
+              if (free == 1) return Color(255, 128, 0);  // orange
+              return Color(255, 0, 0);                   // red
+            };
+            Color blue(0, 102, 255);
+            std::string zone = id(charging_zone).state;
+            it[0] = (zone == "Cadix")  ? blue : color_for(id(cadixstraat_free).state);
+            it[1] = (zone == "Napels") ? blue : color_for(id(napelsstraat_free).state);
+            it[2] = (zone == "Madras") ? blue : color_for(id(madrasstraat_free).state);
+
+sensor:
+  - platform: homeassistant
+    id: ev_battery
+    entity_id: sensor.2cjn170_caitlyn_state_of_charge
+
+  - platform: homeassistant
+    id: charging_power
+    entity_id: sensor.2cjn170_caitlyn_charging_power
+
+  - platform: homeassistant
+    id: ev_range
+    entity_id: sensor.2cjn170_caitlyn_range_electric
+
+  - platform: homeassistant
+    id: weather_temp
+    entity_id: weather.kmi_galgenweel
+    attribute: temperature
+
+  - platform: homeassistant
+    id: cadixstraat_free
+    entity_id: sensor.cadixstraat_chargers
+
+  - platform: homeassistant
+    id: napelsstraat_free
+    entity_id: sensor.napelsstraat_chargers
+
+  - platform: homeassistant
+    id: madrasstraat_free
+    entity_id: sensor.madrasstraat_chargers
+
+text_sensor:
+  - platform: homeassistant
+    id: car_charging
+    entity_id: binary_sensor.2cjn170_caitlyn_charging_active
+
+  - platform: homeassistant
+    id: end_of_charge
+    entity_id: sensor.car_display_end_of_charge
+
+  - platform: homeassistant
+    id: weather_condition
+    entity_id: weather.kmi_galgenweel
+
+  - platform: homeassistant
+    id: cadixstraat
+    entity_id: sensor.cadixstraat_chargers
+    attribute: friendly_text
+
+  - platform: homeassistant
+    id: napelsstraat
+    entity_id: sensor.napelsstraat_chargers
+    attribute: friendly_text
+
+  - platform: homeassistant
+    id: madrasstraat
+    entity_id: sensor.madrasstraat_chargers
+    attribute: friendly_text
+
+  - platform: homeassistant
+    id: car_display_name
+    entity_id: sensor.car_display_name
+
+  - platform: homeassistant
+    id: car_secured
+    entity_id: sensor.car_display_secured
+
+  - platform: homeassistant
+    id: charging_zone
+    entity_id: sensor.car_display_charging_zone
+
+display:
+  - platform: waveshare_epaper
+    cs_pin: GPIO15
+    dc_pin: GPIO27
+    busy_pin: GPIO25
+    reset_pin: GPIO26
+    model: 7.50inv2
+    reset_duration: 200ms
+    update_interval: 2min
+    lambda: |-
+      it.fill(COLOR_OFF);
+
+      // ============================================================
+      // HEADER: datum links | weer icon + temp rechts
+      // ============================================================
+      it.strftime(20, 18, id(font_medium), TextAlign::TOP_LEFT,
+                  "%A %d/%m/%Y", id(ha_time).now());
+
+      // Weer icon mapping (HA condition states)
+      std::map<std::string, std::string> w_icons {
+        {"sunny",              "\U000F0599"},
+        {"partlycloudy",       "\U000F0595"},
+        {"cloudy",             "\U000F0590"},
+        {"rainy",              "\U000F0597"},
+        {"pouring",            "\U000F0596"},
+        {"lightning",          "\U000F0593"},
+        {"lightning-rainy",    "\U000F067E"},
+        {"fog",                "\U000F0591"},
+        {"windy",              "\U000F059D"},
+        {"snowy",              "\U000F0598"},
+        {"snowy-rainy",        "\U000F0597"},
+      };
+      std::string cond = id(weather_condition).state;
+      std::string w_icon = w_icons.count(cond) ? w_icons[cond] : "\U000F0590";
+      it.print(620, 5, id(mdi_large), TextAlign::TOP_LEFT, w_icon.c_str());
+      if (isnan(id(weather_temp).state)) {
+        it.print(685, 18, id(font_medium), TextAlign::TOP_LEFT, "--°C");
+      } else {
+        it.printf(685, 18, id(font_medium), TextAlign::TOP_LEFT,
+                  "%.0f°C", id(weather_temp).state);
+      }
+
+      // Header lijn (dik, meer lucht onder datum)
+      it.filled_rectangle(0, 68, 800, 2);
+
+      // ============================================================
+      // LINKS: auto naam + batterij + progress bar + laadzones (x: 0-500)
+      // ============================================================
+
+      // Auto naam
+      it.print(20, 82, id(font_medium), TextAlign::TOP_LEFT,
+               id(car_display_name).state.c_str());
+
+      // Batterij icon (groot) + percentage — icon iets lager voor uitlijning
+      float ev_raw = id(ev_battery).state;
+      int ev = (isnan(ev_raw) || ev_raw < 0) ? 0 : (int)ev_raw;
+      if (isnan(ev_raw)) {
+        it.print(10, 130, id(mdi_large), TextAlign::TOP_LEFT, "\U000F007D");
+        it.print(65, 122, id(font_large), TextAlign::TOP_LEFT, "--%");
+      } else {
+        it.print(10, 130, id(mdi_large), TextAlign::TOP_LEFT, "\U000F007D");
+        it.printf(65, 122, id(font_large), TextAlign::TOP_LEFT, "%d%%", ev);
+      }
+
+      // EV Range (rechts naast battery %, onderkant uitgelijnd)
+      float range_raw = id(ev_range).state;
+      if (!isnan(range_raw) && range_raw >= 0) {
+        it.printf(390, 180, id(font_medium), TextAlign::BOTTOM_LEFT,
+                  "%.0f km", range_raw);
+      } else {
+        it.print(390, 180, id(font_medium), TextAlign::BOTTOM_LEFT, "-- km");
+      }
+
+      // Progress bar (solide opvulling)
+      int bx = 20, by = 187, bw = 460, bh = 40;
+      int fill = (int)(bw * ev / 100.0);
+      if (fill > 0) it.filled_rectangle(bx, by, fill, bh);
+      it.rectangle(bx, by, bw, bh);
+
+      // Laadzones
+      it.filled_rectangle(20, 244, 460, 2);
+      it.print(20, 260, id(font_medium), TextAlign::TOP_LEFT, "Cadixstraat");
+      it.print(480, 260, id(font_medium), TextAlign::TOP_RIGHT,
+               id(cadixstraat).state.c_str());
+      it.print(20, 296, id(font_medium), TextAlign::TOP_LEFT, "Napelsstraat");
+      it.print(480, 296, id(font_medium), TextAlign::TOP_RIGHT,
+               id(napelsstraat).state.c_str());
+      it.print(20, 332, id(font_medium), TextAlign::TOP_LEFT, "Madrasstraat");
+      it.print(480, 332, id(font_medium), TextAlign::TOP_RIGHT,
+               id(madrasstraat).state.c_str());
+
+      // ============================================================
+      // VERTICALE LIJN (dik, start ter hoogte van batterij%)
+      // ============================================================
+      it.filled_rectangle(499, 122, 2, 358);
+
+      // ============================================================
+      // RECHTS: secured + charging speed + ETA (x: 500-800)
+      // ============================================================
+      bool secured = id(car_secured).state == "True";
+
+      // Shield icon
+      std::string secure_icon = secured ? "\U000F0CC8" : "\U000F099E";
+      it.print(510, 122, id(mdi_large), TextAlign::TOP_LEFT, secure_icon.c_str());
+      it.print(568, 134, id(font_medium), TextAlign::TOP_LEFT,
+          secured ? "Secured" : "Not Secured");
+
+      // EV station icon + charging speed
+      it.print(510, 180, id(mdi_large), TextAlign::TOP_LEFT, "\U000F05F1");
+      float pwr = id(charging_power).state;
+      if (isnan(pwr) || pwr < 0) {
+        it.print(568, 192, id(font_medium), TextAlign::TOP_LEFT, "0 kW");
+      } else {
+        it.printf(568, 192, id(font_medium), TextAlign::TOP_LEFT,
+                  "%.1f kW", pwr);
+      }
+
+      // Clock-end icon + ETA
+      it.print(510, 238, id(mdi_large), TextAlign::TOP_LEFT, "\U000F0152");
+      std::string eta = id(end_of_charge).state;
+      if (eta.empty() || eta == "unknown" || eta == "unavailable") {
+        it.print(568, 250, id(font_medium), TextAlign::TOP_LEFT, "--:--");
+      } else {
+        it.print(568, 250, id(font_medium), TextAlign::TOP_LEFT, eta.c_str());
+      }
+
+      // EV plug icon + charging zone (only while charging)
+      std::string czone = id(charging_zone).state;
+      if (!czone.empty() && czone != "none" &&
+          czone != "unknown" && czone != "unavailable") {
+        it.print(510, 296, id(mdi_large), TextAlign::TOP_LEFT, "\U000F151E");
+        it.print(568, 308, id(font_medium), TextAlign::TOP_LEFT, czone.c_str());
+      }
