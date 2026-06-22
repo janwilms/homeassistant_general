@@ -5,9 +5,9 @@ unique_id: ev_charging_point_became_available_v2
 # ── Tune these values without touching the conditions ──────────────────────
 variables:
   soc_threshold: 50       # notify only when battery is below this %
-  quiet_start_hour: 22    # no notifications from this hour onward (22 = 22:00)
-  quiet_end_hour: 8       # no notifications before this hour (8 = 08:00)
-  cooldown_seconds: 1800  # minimum seconds between notifications (1800 = 30 min)
+  quiet_start_hour: 20    # no notifications from this hour onward (20 = 20:00)
+  quiet_end_hour: 10      # no notifications before this hour (10 = 10:00)
+  cooldown_seconds: 3600  # minimum seconds between notifications (3600 = 60 min)
 # ───────────────────────────────────────────────────────────────────────────
 
 trigger:
