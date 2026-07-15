@@ -80,24 +80,19 @@ light:
     num_leds: 3
     name: "Charging Zone LEDs"
     id: zone_leds
-    default_transition_length: 2s
+    default_transition_length: 5s
     restore_mode: ALWAYS_ON
     effects:
       - addressable_lambda:
           name: "zone_colors"
-          update_interval: 2min
+          update_interval: 5min
           lambda: |-
-            auto color_for = [](float val) -> Color {
-              int free = isnan(val) ? -1 : (int)val;
-              if (free >= 2) return Color(0, 255, 0);    // green
-              if (free == 1) return Color(255, 128, 0);  // orange
-              return Color(255, 0, 0);                   // red
-            };
             Color blue(0, 102, 255);
+            Color off_(0, 0, 0);
             std::string zone = id(charging_zone).state;
-            it[0] = (zone == "Cadix")  ? blue : color_for(id(cadixstraat_free).state);
-            it[1] = (zone == "Napels") ? blue : color_for(id(napelsstraat_free).state);
-            it[2] = (zone == "Madras") ? blue : color_for(id(madrasstraat_free).state);
+            it[0] = (zone == "Cadix")  ? blue : off_;
+            it[1] = (zone == "Napels") ? blue : off_;
+            it[2] = (zone == "Madras") ? blue : off_;
 
 sensor:
   - platform: homeassistant
@@ -117,18 +112,6 @@ sensor:
     entity_id: weather.kmi_galgenweel
     attribute: temperature
 
-  - platform: homeassistant
-    id: cadixstraat_free
-    entity_id: sensor.cadixstraat_chargers
-
-  - platform: homeassistant
-    id: napelsstraat_free
-    entity_id: sensor.napelsstraat_chargers
-
-  - platform: homeassistant
-    id: madrasstraat_free
-    entity_id: sensor.madrasstraat_chargers
-
 text_sensor:
   - platform: homeassistant
     id: car_charging
@@ -141,21 +124,6 @@ text_sensor:
   - platform: homeassistant
     id: weather_condition
     entity_id: weather.kmi_galgenweel
-
-  - platform: homeassistant
-    id: cadixstraat
-    entity_id: sensor.cadixstraat_chargers
-    attribute: friendly_text
-
-  - platform: homeassistant
-    id: napelsstraat
-    entity_id: sensor.napelsstraat_chargers
-    attribute: friendly_text
-
-  - platform: homeassistant
-    id: madrasstraat
-    entity_id: sensor.madrasstraat_chargers
-    attribute: friendly_text
 
   - platform: homeassistant
     id: car_display_name
@@ -173,11 +141,13 @@ display:
   - platform: waveshare_epaper
     cs_pin: GPIO15
     dc_pin: GPIO27
-    busy_pin: GPIO25
+    busy_pin:
+      number: GPIO25
+      inverted: true
     reset_pin: GPIO26
-    model: 7.50inv2
+    model: 7.50inv2alt
     reset_duration: 200ms
-    update_interval: 2min
+    update_interval: 5min
     lambda: |-
       it.fill(COLOR_OFF);
 
@@ -187,7 +157,6 @@ display:
       it.strftime(20, 18, id(font_medium), TextAlign::TOP_LEFT,
                   "%A %d/%m/%Y", id(ha_time).now());
 
-      // Weer icon mapping (HA condition states)
       std::map<std::string, std::string> w_icons {
         {"sunny",              "\U000F0599"},
         {"partlycloudy",       "\U000F0595"},
@@ -211,94 +180,73 @@ display:
                   "%.0f°C", id(weather_temp).state);
       }
 
-      // Header lijn (dik, meer lucht onder datum)
       it.filled_rectangle(0, 68, 800, 2);
 
       // ============================================================
-      // LINKS: auto naam + batterij + progress bar + laadzones (x: 0-500)
+      // Auto naam + batterij + progress bar (nu volle breedte)
       // ============================================================
-
-      // Auto naam
       it.print(20, 82, id(font_medium), TextAlign::TOP_LEFT,
                id(car_display_name).state.c_str());
 
-      // Batterij icon (groot) + percentage — icon iets lager voor uitlijning
       float ev_raw = id(ev_battery).state;
       int ev = (isnan(ev_raw) || ev_raw < 0) ? 0 : (int)ev_raw;
+      it.print(10, 130, id(mdi_large), TextAlign::TOP_LEFT, "\U000F007D");
       if (isnan(ev_raw)) {
-        it.print(10, 130, id(mdi_large), TextAlign::TOP_LEFT, "\U000F007D");
         it.print(65, 122, id(font_large), TextAlign::TOP_LEFT, "--%");
       } else {
-        it.print(10, 130, id(mdi_large), TextAlign::TOP_LEFT, "\U000F007D");
         it.printf(65, 122, id(font_large), TextAlign::TOP_LEFT, "%d%%", ev);
       }
 
-      // EV Range (rechts naast battery %, onderkant uitgelijnd)
+      // EV Range — rechts uitgelijnd boven de bar, schuift mee met de nieuwe breedte
       float range_raw = id(ev_range).state;
       if (!isnan(range_raw) && range_raw >= 0) {
-        it.printf(390, 180, id(font_medium), TextAlign::BOTTOM_LEFT,
+        it.printf(780, 180, id(font_medium), TextAlign::BOTTOM_RIGHT,
                   "%.0f km", range_raw);
       } else {
-        it.print(390, 180, id(font_medium), TextAlign::BOTTOM_LEFT, "-- km");
+        it.print(780, 180, id(font_medium), TextAlign::BOTTOM_RIGHT, "-- km");
       }
 
-      // Progress bar (solide opvulling)
-      int bx = 20, by = 187, bw = 460, bh = 40;
+      // Progress bar — breder, volle breedte
+      int bx = 20, by = 187, bw = 760, bh = 40;
       int fill = (int)(bw * ev / 100.0);
       if (fill > 0) it.filled_rectangle(bx, by, fill, bh);
       it.rectangle(bx, by, bw, bh);
 
-      // Laadzones
-      it.filled_rectangle(20, 244, 460, 2);
-      it.print(20, 260, id(font_medium), TextAlign::TOP_LEFT, "Cadixstraat");
-      it.print(480, 260, id(font_medium), TextAlign::TOP_RIGHT,
-               id(cadixstraat).state.c_str());
-      it.print(20, 296, id(font_medium), TextAlign::TOP_LEFT, "Napelsstraat");
-      it.print(480, 296, id(font_medium), TextAlign::TOP_RIGHT,
-               id(napelsstraat).state.c_str());
-      it.print(20, 332, id(font_medium), TextAlign::TOP_LEFT, "Madrasstraat");
-      it.print(480, 332, id(font_medium), TextAlign::TOP_RIGHT,
-               id(madrasstraat).state.c_str());
+      it.filled_rectangle(20, 244, 760, 2);
 
       // ============================================================
-      // VERTICALE LIJN (dik, start ter hoogte van batterij%)
-      // ============================================================
-      it.filled_rectangle(499, 122, 2, 358);
-
-      // ============================================================
-      // RECHTS: secured + charging speed + ETA (x: 500-800)
+      // SECURED — klein, zoals voordien, nu eerste lijn onder de bar
       // ============================================================
       bool secured = id(car_secured).state == "True";
-
-      // Shield icon
       std::string secure_icon = secured ? "\U000F0CC8" : "\U000F099E";
-      it.print(510, 122, id(mdi_large), TextAlign::TOP_LEFT, secure_icon.c_str());
-      it.print(568, 134, id(font_medium), TextAlign::TOP_LEFT,
+      it.print(20, 260, id(mdi_large), TextAlign::TOP_LEFT, secure_icon.c_str());
+      it.print(78, 272, id(font_medium), TextAlign::TOP_LEFT,
           secured ? "Secured" : "Not Secured");
 
-      // EV station icon + charging speed
-      it.print(510, 180, id(mdi_large), TextAlign::TOP_LEFT, "\U000F05F1");
+      // ============================================================
+      // Laadsnelheid + ETA — daaronder
+      // ============================================================
+      it.print(20, 316, id(mdi_large), TextAlign::TOP_LEFT, "\U000F05F1");
       float pwr = id(charging_power).state;
       if (isnan(pwr) || pwr < 0) {
-        it.print(568, 192, id(font_medium), TextAlign::TOP_LEFT, "0 kW");
+        it.print(78, 328, id(font_medium), TextAlign::TOP_LEFT, "0 kW");
       } else {
-        it.printf(568, 192, id(font_medium), TextAlign::TOP_LEFT,
+        it.printf(78, 328, id(font_medium), TextAlign::TOP_LEFT,
                   "%.1f kW", pwr);
       }
 
-      // Clock-end icon + ETA
-      it.print(510, 238, id(mdi_large), TextAlign::TOP_LEFT, "\U000F0152");
+      it.print(420, 316, id(mdi_large), TextAlign::TOP_LEFT, "\U000F0152");
       std::string eta = id(end_of_charge).state;
       if (eta.empty() || eta == "unknown" || eta == "unavailable") {
-        it.print(568, 250, id(font_medium), TextAlign::TOP_LEFT, "--:--");
+        it.print(478, 328, id(font_medium), TextAlign::TOP_LEFT, "--:--");
       } else {
-        it.print(568, 250, id(font_medium), TextAlign::TOP_LEFT, eta.c_str());
+        it.print(478, 328, id(font_medium), TextAlign::TOP_LEFT, eta.c_str());
       }
 
-      // EV plug icon + charging zone (only while charging)
+      // EV plug icon + laadzone (enkel zichtbaar tijdens laden)
       std::string czone = id(charging_zone).state;
       if (!czone.empty() && czone != "none" &&
           czone != "unknown" && czone != "unavailable") {
-        it.print(510, 296, id(mdi_large), TextAlign::TOP_LEFT, "\U000F151E");
-        it.print(568, 308, id(font_medium), TextAlign::TOP_LEFT, czone.c_str());
+        it.print(20, 372, id(mdi_large), TextAlign::TOP_LEFT, "\U000F151E");
+        it.print(78, 384, id(font_medium), TextAlign::TOP_LEFT, czone.c_str());
       }

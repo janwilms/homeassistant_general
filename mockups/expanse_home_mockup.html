@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<!--
+  HOME — "Aggregate Relay" mockup (Expanse-theme concept)
+  ─────────────────────────────────────────────────────────
+  Reskins the REAL "Home" (lovelace / Overview) dashboard as it exists today:
+  sections = Home (lights+door+graphs), Daily (weather+calendar),
+  Fleet/Fit/Sailing (Caitlyn glance, Camina countdown, Fit stats, Galgenweel).
+
+  Style reference: the Canterbury "Aggregate Relay" news-board screen —
+  cool cyan/teal monochrome, curved-panel feel, multiple feeds side by side.
+  State colors (light on/off, lock, weather) still use normal semantic
+  colors (green/amber/red) on top of the cyan frame, same as HA would.
+
+  Fonts: Tektur (headers/labels, chosen by Jan 6 jul 2026) + Share Tech Mono
+  (data/log text) — both free Google Fonts.
+  Real entities referenced in comments so this maps 1:1 to the live config.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HOME — Aggregate Relay (mockup)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Tektur:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --cyan:#5eead4; --cyan-dim:#0e7490; --cyan-glow:rgba(94,234,212,0.25);
+    --green:#4ade80; --amber:#fbbf24; --red:#f87171; --blue:#60a5fa;
+    --ink:#dff7f2; --muted:#7fa8a4; --dim:#3f5c58;
+    --panel:rgba(6,20,22,0.86); --panel-b:rgba(94,234,212,0.22);
+    --chip:rgba(94,234,212,0.06);
+  }
+  body{
+    min-height:100vh; padding:16px;
+    font-family:'Tektur',system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(ellipse at top, rgba(94,234,212,0.06), transparent 60%),
+      repeating-linear-gradient(0deg, rgba(94,234,212,0.035) 0px, rgba(94,234,212,0.035) 1px, transparent 1px, transparent 34px),
+      repeating-linear-gradient(90deg, rgba(94,234,212,0.035) 0px, rgba(94,234,212,0.035) 1px, transparent 1px, transparent 34px),
+      #030b0c;
+  }
+  .mono{font-family:'Share Tech Mono',monospace;}
+  .wrap{max-width:1500px;margin:0 auto;}
+
+  /* ── TOP BAR ─────────────────────────────────────────────── */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    border:1px solid var(--panel-b); background:var(--panel);
+    border-radius:2px; padding:10px 16px; margin-bottom:14px;
+    box-shadow:0 0 24px rgba(94,234,212,0.06) inset;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand i{font-size:22px; color:var(--cyan);}
+  .brand-title{font-weight:700; letter-spacing:0.14em; font-size:15px;}
+  .brand-sub{font-size:9.5px; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase;}
+  .topstats{display:flex; gap:22px;}
+  .tstat{font-size:10.5px; color:var(--muted); text-align:right;}
+  .tstat strong{display:block; color:var(--cyan); font-size:12px;}
+
+  /* ── PANEL ───────────────────────────────────────────────── */
+  .panel{
+    border:1px solid var(--panel-b); background:var(--panel);
+    border-radius:2px; margin-bottom:14px; position:relative;
+  }
+  .panel::before{ /* corner bracket accent */
+    content:''; position:absolute; top:-1px; left:-1px; width:14px; height:14px;
+    border-top:2px solid var(--cyan); border-left:2px solid var(--cyan);
+  }
+  .panel::after{
+    content:''; position:absolute; bottom:-1px; right:-1px; width:14px; height:14px;
+    border-bottom:2px solid var(--cyan); border-right:2px solid var(--cyan);
+  }
+  .ph{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 14px; border-bottom:1px solid var(--panel-b);
+    font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase;
+  }
+  .ph .tag{color:var(--muted); font-size:9px; letter-spacing:0.08em;}
+  .pb{padding:14px;}
+
+  .grid{display:grid; gap:12px;}
+  .g5{grid-template-columns:repeat(5,1fr);}
+  .g4{grid-template-columns:repeat(4,1fr);}
+  .g2{grid-template-columns:repeat(2,1fr);}
+  .g3{grid-template-columns:repeat(3,1fr);}
+
+  /* ── TILE (lights etc) ──────────────────────────────────── */
+  .tile{
+    background:var(--chip); border:1px solid var(--panel-b); border-radius:2px;
+    padding:10px; display:flex; flex-direction:column; align-items:center; gap:6px;
+    text-align:center;
+  }
+  .tile i{font-size:22px;}
+  .tile .tn{font-size:9.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em;}
+  .tile .tv{font-size:10.5px; font-weight:700;}
+  .tile.wide{grid-column:1/-1; flex-direction:row; justify-content:center; gap:12px;}
+
+  /* ── GRAPH ───────────────────────────────────────────────── */
+  .graph-card{grid-column:1/-1;}
+  .glabel{font-size:9.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;}
+  .gsvg{width:100%; height:auto; display:block;}
+
+  /* ── GLANCE ROW ──────────────────────────────────────────── */
+  .glance{display:grid; grid-template-columns:repeat(4,1fr); gap:8px;}
+  .gitem{
+    background:var(--chip); border:1px solid var(--panel-b); border-radius:2px;
+    padding:8px; display:flex; align-items:center; gap:8px; font-size:10.5px;
+  }
+  .gitem i{font-size:18px; flex-shrink:0;}
+
+  /* ── STATUS LOG STRIP ────────────────────────────────────── */
+  .logstrip{
+    font-size:9.5px; color:var(--dim); line-height:1.7; max-height:70px; overflow:hidden;
+  }
+  .logstrip .ok{color:var(--green);} .logstrip .warn{color:var(--amber);}
+
+  /* ── CALENDAR-ish LIST ───────────────────────────────────── */
+  .evrow{display:flex; justify-content:space-between; font-size:10.5px; padding:5px 0; border-bottom:1px dashed var(--panel-b);}
+  .evrow span:first-child{color:var(--muted);}
+
+  .footer{text-align:center; font-size:9px; color:var(--dim); letter-spacing:0.15em; margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="brand">
+      <i class="mdi mdi-home-city-outline"></i>
+      <div>
+        <div class="brand-title">AGGREGATE RELAY // HOME</div>
+        <div class="brand-sub mono">Antwerpen · residential grid</div>
+      </div>
+    </div>
+    <div class="topstats mono">
+      <div class="tstat">STATUS<strong class="ok" style="color:var(--green)">NOMINAL</strong></div>
+      <div class="tstat">LINK<strong>ACTIVE</strong></div>
+      <div class="tstat">06 JUL 2026<strong>07:41</strong></div>
+    </div>
+  </div>
+
+  <!-- HOME: lights, door, graphs -->
+  <!-- real entities: light.bedroom_2, light.computer_room, light.hallway, light.kitchen,
+       light.living_room, binary_sensor.lumi_lumi_sensor_magnet_aq2_opening (front door),
+       sensor.family_room_temperature (mini-graph 24h), sensor.power_meter_power (mini-graph 24h) -->
+  <div class="panel">
+    <div class="ph"><span><i class="mdi mdi-home mono" style="margin-right:6px;color:var(--cyan)"></i>HOME</span><span class="tag mono">ZONE.RESIDENTIAL</span></div>
+    <div class="pb">
+      <div class="grid g5" style="margin-bottom:12px">
+        <div class="tile"><i class="mdi mdi-lightbulb-outline" style="color:var(--dim)"></i><div class="tn">Bedroom</div><div class="tv" style="color:var(--dim)">Off</div></div>
+        <div class="tile"><i class="mdi mdi-lightbulb" style="color:var(--amber)"></i><div class="tn">Computer Room</div><div class="tv" style="color:var(--amber)">On</div></div>
+        <div class="tile"><i class="mdi mdi-lightbulb-outline" style="color:var(--dim)"></i><div class="tn">Hallway</div><div class="tv" style="color:var(--dim)">Off</div></div>
+        <div class="tile"><i class="mdi mdi-lightbulb" style="color:var(--amber)"></i><div class="tn">Kitchen</div><div class="tv" style="color:var(--amber)">On</div></div>
+        <div class="tile"><i class="mdi mdi-lightbulb-outline" style="color:var(--dim)"></i><div class="tn">Living Room</div><div class="tv" style="color:var(--dim)">Off</div></div>
+      </div>
+      <div class="tile wide" style="margin-bottom:14px">
+        <i class="mdi mdi-door-closed-lock" style="color:var(--green)"></i>
+        <div><div class="tn">Front Door Lock</div><div class="tv" style="color:var(--green)">Secured</div></div>
+      </div>
+
+      <div class="grid g2">
+        <div class="graph-card" style="grid-column:span 1">
+          <div class="glabel mono">TEMP · LIVING ROOM // 24H</div>
+          <svg class="gsvg" viewBox="0 0 400 90" xmlns="http://www.w3.org/2000/svg">
+            <line x1="0" y1="60" x2="400" y2="60" stroke="var(--panel-b)" stroke-width="0.6" stroke-dasharray="4 4"/>
+            <line x1="0" y1="30" x2="400" y2="30" stroke="var(--panel-b)" stroke-width="0.6" stroke-dasharray="4 4"/>
+            <polyline points="0,55 40,50 80,45 120,40 160,35 200,32 240,30 280,33 320,40 360,48 400,52"
+              fill="none" stroke="var(--cyan)" stroke-width="2"/>
+            <circle cx="400" cy="52" r="3.5" fill="var(--cyan)"/>
+            <text x="4" y="14" fill="var(--muted)" font-size="8" class="mono">21.4°C</text>
+          </svg>
+        </div>
+        <div class="graph-card" style="grid-column:span 1">
+          <div class="glabel mono">POWER DRAW // 24H</div>
+          <svg class="gsvg" viewBox="0 0 400 90" xmlns="http://www.w3.org/2000/svg">
+            <line x1="0" y1="60" x2="400" y2="60" stroke="var(--panel-b)" stroke-width="0.6" stroke-dasharray="4 4"/>
+            <line x1="0" y1="30" x2="400" y2="30" stroke="var(--panel-b)" stroke-width="0.6" stroke-dasharray="4 4"/>
+            <polyline points="0,70 40,68 80,40 120,25 160,45 200,60 240,65 280,35 320,20 360,50 400,66"
+              fill="none" stroke="var(--amber)" stroke-width="2"/>
+            <circle cx="400" cy="66" r="3.5" fill="var(--amber)"/>
+            <text x="4" y="14" fill="var(--muted)" font-size="8" class="mono">640 W</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DAILY: weather + calendar -->
+  <!-- real entities: weather.buienradar, calendar.j_wilms_gmail_com, calendar.algb -->
+  <div class="grid g2">
+    <div class="panel">
+      <div class="ph"><span>DAILY // WEATHER</span><span class="tag mono">BUIENRADAR</span></div>
+      <div class="pb" style="display:flex;align-items:center;gap:16px">
+        <i class="mdi mdi-weather-partly-cloudy" style="font-size:44px;color:var(--cyan)"></i>
+        <div>
+          <div style="font-size:26px;font-weight:700">21°C</div>
+          <div class="mono" style="font-size:10px;color:var(--muted)">Partly cloudy · wind 12 km/h</div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><span>DAILY // CALENDAR</span><span class="tag mono">WEEK VIEW</span></div>
+      <div class="pb">
+        <div class="evrow"><span>17:30</span><span>Cambridge</span></div>
+        <div class="evrow"><span>THU</span><span>Quinten — Vermant Mechelen</span></div>
+        <div class="evrow"><span>—</span><span class="mono" style="color:var(--dim)">no further entries</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLEET / FIT / SAILING -->
+  <!-- real entities: lock.2cjn170_caitlyn_lock, binary_sensor.2cjn170_caitlyn_windows_closed,
+       sensor.2cjn170_caitlyn_state_of_charge, sensor.2cjn170_caitlyn_fuel_level,
+       sensor.caitlyn_total_range, sensor.car_display_end_of_charge,
+       sensor.countdown_camina_ev5_delivery,
+       sensor.jan_w_resting_heart_rate, sensor.jan_w_steps, sensor.jan_w_calories,
+       sensor.galgenweel_beaufort, sensor.galgenweel_sailing_advice -->
+  <div class="panel">
+    <div class="ph"><span>FLEET &amp; VITALS</span><span class="tag mono">MULTI-FEED</span></div>
+    <div class="pb">
+      <div class="glabel mono" style="margin-bottom:6px">CAITLYN — MERCEDES CLA 250e</div>
+      <div class="glance" style="margin-bottom:12px">
+        <div class="gitem"><i class="mdi mdi-lock" style="color:var(--green)"></i>Locked</div>
+        <div class="gitem"><i class="mdi mdi-window-closed" style="color:var(--green)"></i>Windows Closed</div>
+        <div class="gitem"><i class="mdi mdi-battery-high" style="color:var(--cyan)"></i>SoC 78%</div>
+        <div class="gitem"><i class="mdi mdi-gas-station" style="color:var(--amber)"></i>Fuel 54%</div>
+      </div>
+      <div class="grid g4" style="margin-bottom:14px">
+        <div class="tile"><i class="mdi mdi-map-marker-distance" style="color:var(--cyan)"></i><div class="tn">Total Range</div><div class="tv">612 km</div></div>
+        <div class="tile"><i class="mdi mdi-clock-check-outline" style="color:var(--cyan)"></i><div class="tn">End of Charge</div><div class="tv">2:15h</div></div>
+        <div class="tile"><i class="mdi mdi-car-electric-outline" style="color:var(--amber)"></i><div class="tn">Camina Delivery</div><div class="tv">~T-14d</div></div>
+        <div class="tile"><i class="mdi mdi-heart-pulse" style="color:var(--red)"></i><div class="tn">RHR</div><div class="tv">58 bpm</div></div>
+      </div>
+      <div class="grid g3">
+        <div class="tile"><i class="mdi mdi-shoe-print" style="color:var(--cyan)"></i><div class="tn">Steps</div><div class="tv">6,214</div></div>
+        <div class="tile"><i class="mdi mdi-fire" style="color:var(--amber)"></i><div class="tn">Calories</div><div class="tv">1,840</div></div>
+        <div class="tile"><i class="mdi mdi-sail-boat" style="color:var(--cyan)"></i><div class="tn">Galgenweel</div><div class="tv">BFT 3 · Sail</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer mono">AGGREGATE RELAY — ALL FEEDS NOMINAL — REFRESH 30s</div>
+</div>
+</body>
+</html>

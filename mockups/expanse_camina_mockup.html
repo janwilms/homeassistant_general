@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<!--
+  CAMINA — MCRN Tactical mockup v3 (Expanse-theme concept)
+  ─────────────────────────────────────────────────────────
+  SPECULATIVE — Camina isn't delivered yet, reuses the planned "car
+  facade" entity layer (sensor.car_ev_battery, binary_sensor.car_*, etc.)
+
+  v3 changes: same as Caitlyn v3 — palette moved from maroon/warm-brown
+  to blue-green (teal/cyan), doors/windows use the "counter-tile" style
+  (label + value + colored underline bar) instead of icon chips, tyres
+  keep tick-bar treatment. Hero SECURED panel left as-is, revisit once
+  actually building in HA.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAMINA — MCRN Tactical v3 (mockup)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Tektur:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --line:rgba(205,238,231,0.26); --line-soft:rgba(205,238,231,0.13);
+    --teal:#173634; --panel:#0a1615; --tile:#112724;
+    --amber:#eab13a; --green:#59d98c; --green-deep:#0c2416; --red:#e05a56; --blue:#6fb3e0; --cyan:#5eead4;
+    --ink:#eaf7f4; --muted:#8fada8; --dim:#3d524e;
+  }
+  body{min-height:100vh; padding:16px; font-family:'Tektur',system-ui,sans-serif; color:var(--ink); background:#070d0c;}
+  .mono{font-family:'Share Tech Mono',monospace;}
+  .wrap{max-width:1500px;margin:0 auto;}
+
+  .topbar{display:flex; align-items:center; justify-content:space-between; border:1px solid var(--line); background:var(--panel); padding:10px 16px; margin-bottom:12px;
+    clip-path:polygon(14px 0, 100% 0, 100% 100%, 0 100%, 0 14px);}
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand i{font-size:24px; color:var(--cyan);}
+  .brand-title{font-weight:700; letter-spacing:0.12em; font-size:16px;}
+  .brand-sub{font-size:9.5px; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase;}
+  .topstats{display:flex; gap:20px;}
+  .tstat{font-size:10px; color:var(--muted); text-align:right;}
+  .tstat strong{display:block; font-size:12px;}
+
+  .speculative-banner{border:1px dashed var(--amber); background:rgba(234,177,58,0.06); color:var(--amber); font-size:10.5px; padding:8px 12px; margin-bottom:12px;}
+
+  .panel{border:1px solid var(--line); background:var(--panel); margin-bottom:14px;
+    clip-path:polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);}
+  .tbar{background:var(--teal); padding:8px 14px; border-bottom:1px solid var(--line); font-size:11px; font-weight:700; letter-spacing:0.13em; text-transform:uppercase; display:flex; justify-content:space-between;}
+  .tbar .tag{color:var(--muted); font-size:9px; letter-spacing:0.06em;}
+  .pb{padding:14px;}
+
+  .row{display:grid; gap:12px;}
+  .c2{grid-template-columns:repeat(2,1fr);} .c3{grid-template-columns:repeat(3,1fr);} .c4{grid-template-columns:repeat(4,1fr);}
+
+  .stats{display:grid; grid-template-columns:1fr; gap:7px;}
+  .stat{background:var(--tile); border:1px solid var(--line-soft); padding:9px 12px; text-align:left; display:flex; align-items:baseline; justify-content:space-between;
+    clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px);}
+  .sv{font-size:16px; font-weight:700;} .sl{font-size:8.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em;}
+
+  .chip{background:var(--tile); border:1px solid var(--line-soft); padding:7px 8px; display:flex; align-items:center; gap:7px;
+    clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);}
+  .chip i{font-size:16px;}
+  .cl{font-size:8.5px; color:var(--muted);} .cv{font-size:10.5px; font-weight:700;}
+  .cg{display:grid; grid-template-columns:1fr 1fr; gap:6px;}
+
+  .gauge svg{width:100%; max-width:190px; height:auto; display:block; margin:0 auto;}
+
+  .glance{display:grid; gap:6px;}
+  .gc4{grid-template-columns:repeat(4,1fr);}
+  .gi{background:var(--tile); border:1px solid var(--line-soft); padding:7px 5px; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:8.5px; color:var(--muted); text-align:center;}
+  .gi i{font-size:17px;} .gi strong{font-size:9px;}
+
+  .actions{display:grid; grid-template-columns:repeat(6,1fr); gap:8px;}
+  .act{background:var(--tile); border:1px solid var(--line-soft); color:var(--ink); padding:9px 6px; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:9.5px; font-family:inherit;}
+  .act i{font-size:20px;}
+  .act.params{border-style:dashed;}
+
+  /* door/window counter-tile */
+  .dgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px;}
+  .dtile{background:var(--tile); border:1px solid var(--line-soft); padding:8px 6px 7px; text-align:center;
+    clip-path:polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);}
+  .dtile-name{font-size:12px; font-weight:700; letter-spacing:0.02em; margin-bottom:11px;}
+  .dtile-bar{height:4px; background:var(--green);}
+  .dtile-bar.alert{background:var(--red);}
+  .sec-label{font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--dim); margin:10px 0 6px;}
+  .sec-label:first-child{margin-top:0;}
+
+  /* hero */
+  .hero-row{display:flex; align-items:stretch; gap:6px; margin-bottom:14px;}
+  .hero-bracket{width:26px; border:1px solid var(--line); background:var(--tile); clip-path:polygon(0 20%, 100% 0, 100% 100%, 0 80%);}
+  .hero-main{flex:1; background:var(--green); color:var(--green-deep); text-align:center; padding:20px 10px;
+    clip-path:polygon(22px 0,100% 0,100% calc(100% - 22px),calc(100% - 22px) 100%,0 100%,0 22px);}
+  .hero-label{font-size:10px; letter-spacing:0.14em; text-transform:uppercase; opacity:0.75; margin-bottom:4px;}
+  .hero-value{font-size:30px; font-weight:800; letter-spacing:0.1em;}
+  .hero-sub{margin-top:14px; padding-top:10px; border-top:1px solid rgba(12,36,22,0.3); font-size:9px;}
+
+  .tickbar{margin-bottom:10px;}
+  .tb-head{display:flex; justify-content:space-between; font-size:9px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); margin-bottom:4px;}
+  .tb-head .idx{color:var(--dim);}
+  .tbsvg{width:100%; height:auto; display:block;}
+
+  /* ── sensor-bar-card-plus style (verified against its real GitHub README) ──
+     No native tick-marks/ruler — smooth rounded bar, color_mode gradient/
+     severity, optional thin target-line marker. */
+  .sbar-row{display:flex; align-items:center; gap:8px; margin-bottom:10px;}
+  .sbar-icon{font-size:15px; color:var(--muted); width:16px; text-align:center; flex-shrink:0;}
+  .sbar-label{font-size:9px; color:var(--muted); width:130px; flex-shrink:0; text-transform:uppercase; letter-spacing:.04em;}
+  .sbar-track{flex:1; height:16px; background:var(--tile); border:1px solid var(--line-soft); border-radius:8px; position:relative; overflow:hidden;}
+  .sbar-fill{height:100%; border-radius:8px 0 0 8px;}
+  .sbar-target{position:absolute; top:-1px; bottom:-1px; width:2px; background:var(--ink); opacity:0.8;}
+  .sbar-value{font-size:10px; font-weight:700; width:40px; text-align:right; flex-shrink:0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <i class="mdi mdi-car-electric"></i>
+      <div><div class="brand-title">CAMINA — SYSTEM CONTROL INTERFACE</div><div class="brand-sub mono">Kia EV5 · pending delivery</div></div>
+    </div>
+    <div class="topstats mono">
+      <div class="tstat">DRIVE LINK<strong style="color:var(--dim)">N/A</strong></div>
+      <div class="tstat">COMMS<strong style="color:var(--dim)">N/A</strong></div>
+      <div class="tstat">STATUS<strong style="color:var(--amber)">AWAITING HANDOVER</strong></div>
+    </div>
+  </div>
+
+  <div class="speculative-banner mono">
+    ⚠ SPECULATIVE — no live entities exist yet. Layout reuses the planned "car facade" entity
+    layer (sensor.car_ev_battery, binary_sensor.car_*, etc.). Values are placeholders.
+  </div>
+
+  <!-- HERO — left as-is for now, real restyle deferred to HA build -->
+  <div class="hero-row">
+    <div class="hero-bracket"></div>
+    <div class="hero-main">
+      <div class="hero-label mono">Primary Lock System · Kia EV5</div>
+      <div class="hero-value">SECURED</div>
+      <div class="hero-sub mono">binary_sensor.car_locked (facade) — placeholder look, revisit in HA</div>
+    </div>
+    <div class="hero-bracket"></div>
+  </div>
+
+  <!-- restructured per feedback (6 jul 2026): STATS = quick facts, POWER CORE = the actual
+       battery/charging story stacked in one panel: circular % on top, linear charge-speed bar
+       (0-150 kW, 150 assumed max for Kia EV5 800V architecture — verify against the real spec
+       once the facade/integration exists), cable+port state, then the history graph. -->
+  <div class="row" style="margin-bottom:14px; grid-template-columns:250px 1fr;">
+    <div class="panel" style="margin-bottom:0">
+      <div class="tbar"><span>Stats</span><span class="tag mono">DRIVE.SYS</span></div>
+      <div class="pb">
+        <div class="stats">
+          <div class="stat"><div class="sv" style="color:var(--green)">320 km</div><div class="sl">Range</div></div>
+          <div class="stat"><div class="sv" style="font-size:13px">1,000 km</div><div class="sl">Odometer</div></div>
+          <div class="stat"><div class="sv" style="font-size:12px">Home</div><div class="sl">Location</div></div>
+          <div class="stat"><div class="sv" style="color:var(--blue)">45 min</div><div class="sl">Charge ETA</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:0">
+      <div class="tbar"><span>Power Core</span><span class="tag mono">EV.SYS + POWER.SYS</span></div>
+      <div class="pb">
+        <div class="gauge" style="margin-bottom:8px">
+          <svg viewBox="0 0 200 112" style="max-width:260px">
+            <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(205,238,231,0.1)" stroke-width="14" stroke-linecap="round"/>
+            <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--green)" stroke-width="14" stroke-linecap="round" stroke-dasharray="201 51"/>
+            <text x="100" y="80" text-anchor="middle" fill="var(--ink)" font-size="34" font-weight="700" font-family="Tektur,sans-serif">80%</text>
+            <text x="100" y="98" text-anchor="middle" fill="var(--muted)" font-size="10" class="mono">BATTERY CHARGE</text>
+          </svg>
+        </div>
+        <!-- real card: custom:sensor-bar-card-plus, min:0 max:150 (Kia EV5 800V — verify real max once confirmed) -->
+        <div class="sbar-row mono" style="margin-bottom:10px">
+          <i class="mdi mdi-lightning-bolt sbar-icon"></i>
+          <div class="sbar-label">Charge Speed</div>
+          <div class="sbar-track"><div class="sbar-fill" style="width:60%;background:var(--amber)"></div></div>
+          <div class="sbar-value">90 kW</div>
+        </div>
+        <div class="cg" style="margin-bottom:10px">
+          <div class="chip"><i class="mdi mdi-power-plug" style="color:var(--amber)"></i><div><div class="cl">Cable</div><div class="cv">Plugged In</div></div></div>
+          <div class="chip"><i class="mdi mdi-ev-plug-type2" style="color:var(--green)"></i><div><div class="cl">Charge Port</div><div class="cv">Closed</div></div></div>
+        </div>
+        <div class="glabel mono" style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">CHARGE SPEED // 8H LOG</div>
+        <svg viewBox="0 0 300 46" style="width:100%">
+          <line x1="0" y1="28" x2="300" y2="28" stroke="var(--line-soft)" stroke-width="0.6" stroke-dasharray="4 4"/>
+          <polyline points="0,37 110,37 122,32 132,18 140,9 300,9" fill="none" stroke="var(--amber)" stroke-width="2"/>
+          <circle cx="300" cy="9" r="3.5" fill="var(--amber)"/>
+        </svg>
+        <div style="display:flex;justify-content:space-between;font-size:8.5px;color:var(--dim);margin-top:4px" class="mono"><span>-8h</span><span>-4h</span><span>NOW</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIMATE + DOORS + WINDOWS in one row — Climate first, narrower row makes the door/window
+       tiles more square. Facade entities: binary_sensor.car_door_fl/fr/rl/rr,
+       binary_sensor.car_window_fl/fr/rl/rr, binary_sensor.car_trunk, binary_sensor.car_hood,
+       binary_sensor.car_sunroof -->
+  <div class="row c3" style="margin-bottom:14px">
+    <div class="panel" style="margin-bottom:0">
+      <div class="tbar"><span>Climate</span><span class="tag mono">LIFE.SYS</span></div>
+      <div class="pb">
+        <div class="chip" style="justify-content:space-between;margin-bottom:10px;padding:9px">
+          <div style="display:flex;align-items:center;gap:8px"><i class="mdi mdi-air-conditioner" style="font-size:22px;color:var(--dim)"></i><div><div class="cl">Climate</div><div class="cv" style="color:var(--dim)">Off</div></div></div>
+          <div style="text-align:right"><div class="cl">Target</div><div style="font-size:17px;font-weight:700">21°C</div></div>
+        </div>
+        <div class="glance gc4">
+          <div class="gi"><i class="mdi mdi-car-seat-heater" style="color:var(--dim)"></i><strong style="color:var(--dim)">Off</strong>FL</div>
+          <div class="gi"><i class="mdi mdi-car-seat-heater" style="color:var(--dim)"></i><strong style="color:var(--dim)">Off</strong>FR</div>
+          <div class="gi"><i class="mdi mdi-car-seat-heater" style="color:var(--dim)"></i><strong style="color:var(--dim)">Off</strong>RL</div>
+          <div class="gi"><i class="mdi mdi-car-seat-heater" style="color:var(--dim)"></i><strong style="color:var(--dim)">Off</strong>RR</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:0">
+      <div class="tbar"><span>Doors</span><span class="tag mono">HULL.SYS</span></div>
+      <div class="pb">
+        <div class="dgrid">
+          <div class="dtile"><div class="dtile-name">Front Left</div><div class="dtile-bar"></div></div>
+          <div class="dtile"><div class="dtile-name">Front Right</div><div class="dtile-bar"></div></div>
+          <div class="dtile"><div class="dtile-name">Rear Left</div><div class="dtile-bar"></div></div>
+          <div class="dtile"><div class="dtile-name">Rear Right</div><div class="dtile-bar"></div></div>
+        </div>
+        <div class="sec-label mono">Hood · Trunk · Roof</div>
+        <div class="dgrid">
+          <div class="dtile"><div class="dtile-name">Hood</div><div class="dtile-bar"></div></div>
+          <div class="dtile"><div class="dtile-name">Trunk</div><div class="dtile-bar"></div></div>
+          <div class="dtile"><div class="dtile-name">Sunroof</div><div class="dtile-bar"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:0">
+      <div class="tbar"><span>Windows</span><span class="tag mono">HULL.SYS</span></div>
+      <div class="pb">
+        <div class="dgrid">
+          <div class="dtile"><div class="dtile-name">Front Left</div><div class="dtile-bar"></div></div>
+          <div class="dtile"><div class="dtile-name">Front Right</div><div class="dtile-bar"></div></div>
+          <div class="dtile"><div class="dtile-name">Rear Left</div><div class="dtile-bar"></div></div>
+          <div class="dtile"><div class="dtile-name">Rear Right</div><div class="dtile-bar"></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- WARNINGS + ACTIONS — side by side per feedback -->
+  <div class="row c2">
+    <div class="panel" style="margin-bottom:0">
+      <div class="tbar"><span>Warnings</span><span class="tag mono">DIAG.SYS</span></div>
+      <div class="pb">
+        <!-- Tyre pressure moved here per Kia integration research: kia_uvo only exposes a
+             binary tire-pressure WARNING flag, not actual PSI/bar values — so this is just OK/alert,
+             not a gauge. See chat note for source. -->
+        <div class="row c2">
+          <div class="chip"><i class="mdi mdi-tire" style="color:var(--green)"></i><div><div class="cl">Tyre Pressure</div><div class="cv">OK</div></div></div>
+          <div class="chip"><i class="mdi mdi-key-alert" style="color:var(--green)"></i><div><div class="cl">Smart Key Battery</div><div class="cv">OK</div></div></div>
+          <div class="chip"><i class="mdi mdi-wiper-wash" style="color:var(--green)"></i><div><div class="cl">Washer Fluid</div><div class="cv">OK</div></div></div>
+          <div class="chip"><i class="mdi mdi-alert-circle" style="color:var(--green)"></i><div><div class="cl">Brake Fluid</div><div class="cv">OK</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:0">
+      <div class="tbar"><span>Actions</span><span class="tag mono">REMOTE.CMD</span></div>
+      <div class="pb">
+        <div class="actions" style="grid-template-columns:repeat(3,1fr)">
+          <button class="act"><i class="mdi mdi-lock" style="color:var(--green)"></i>Lock</button>
+          <button class="act"><i class="mdi mdi-lock-open" style="color:var(--amber)"></i>Unlock</button>
+          <button class="act"><i class="mdi mdi-air-conditioner" style="color:var(--blue)"></i>Start Climate</button>
+          <button class="act"><i class="mdi mdi-ev-station" style="color:var(--cyan)"></i>Start Charge</button>
+          <button class="act"><i class="mdi mdi-ev-plug-type2" style="color:var(--blue)"></i>Open Port</button>
+          <button class="act"><i class="mdi mdi-refresh" style="color:var(--blue)"></i>Force Update</button>
+          <button class="act params"><i class="mdi mdi-battery-charging-100" style="color:var(--cyan)"></i>Charge Limits</button>
+          <button class="act params"><i class="mdi mdi-current-ac" style="color:var(--cyan)"></i>Charge Current</button>
+          <button class="act"><i class="mdi mdi-hazard-lights" style="color:var(--amber)"></i>Hazard Lights</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
